@@ -228,7 +228,7 @@ O estado é localmente estável e só é abandonado com intervenção externa �
 ### 9.3 Amplificadores além do retry
 
 - **Cache frio** — cache esvazia, tráfego vai ao banco, banco fica lento, cache não consegue se repovoar porque o banco está lento.
-- **Caminho de erro custoso** — tratamento de exceção mais caro que o caminho feliz → mais erro → mais lentidão → mais erro.
+- **Caminho de erro custoso** — tratamento de exceção mais caro que o caminho felizmais erro → mais lentidão → mais erro.
 - **Balanceamento reativo** — mais tráfego para o nó que respondeu rápido por acaso.
 
 ### 9.4 Estado da arte
