@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Falhas metaestáveis — nota de escopo de TG</title>
-<meta name="description" content="Nota de escopo de TG (ITA): falhas metaestáveis em sistemas distribuídos — quando o mecanismo de resiliência passa a ser a causa da indisponibilidade.">
+<title>Engineering Resilient Distributed Systems — nota de escopo de TG</title>
+<meta name="description" content="Nota de escopo de TG (ITA): uma esteira de ponta a ponta — modelo de falha, modelo de carga, cenário, observação, mitigação — percorrida em espiral até reproduzir em bancada uma falha metaestável.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -39,7 +39,14 @@ h1{
 .thesis{font-size:20px; line-height:1.55; color:var(--muted); margin:22px 0 0; max-width:52ch}
 .thesis em{color:var(--ink); font-style:italic}
 
-section{padding-top:56px}
+.toc{
+  display:flex; flex-wrap:wrap; gap:7px 20px; margin:34px 0 0;
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.09em; text-transform:uppercase;
+}
+.toc a{color:var(--muted); border-bottom:0}
+.toc a:hover{color:var(--teal)}
+
+section{padding-top:56px; scroll-margin-top:20px}
 .rule{display:flex; align-items:center; gap:14px; margin-bottom:26px}
 .rule span{font-family:var(--mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); white-space:nowrap}
 .rule i{flex:1; height:1px; background:var(--line)}
@@ -81,6 +88,8 @@ button.primary:hover{background:#6BC8AE}
 
 figure{margin:30px 0}
 figure svg{width:100%; height:auto; display:block}
+.pan{overflow-x:auto; overscroll-behavior-x:contain}
+.hint{display:none}
 figcaption{font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:12px; line-height:1.6}
 
 .callout{border-left:2px solid var(--coral); padding:2px 0 2px 20px; margin:26px 0; color:var(--muted); font-style:italic}
@@ -90,8 +99,11 @@ figcaption{font-family:var(--mono); font-size:11.5px; color:var(--muted); margin
 .item{border-bottom:1px solid var(--line); padding:20px 0; display:grid; grid-template-columns:78px 1fr; gap:20px}
 .item .tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding-top:5px}
 .item h4{font-family:var(--display); font-weight:600; font-size:17.5px; margin:0 0 5px; line-height:1.25}
-.item p{font-size:16px; margin:0; color:var(--muted); line-height:1.55}
+.item p{font-size:16px; margin:0 0 12px; color:var(--muted); line-height:1.55}
+.item p:last-child{margin-bottom:0}
 .item .meta{font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:7px}
+.item .num{color:var(--coral)}
+.steps .tag .num{display:block; margin-bottom:3px}
 
 ol.q{padding-left:0; list-style:none; counter-reset:q; margin:0}
 ol.q li{counter-increment:q; padding-left:38px; position:relative; margin-bottom:16px}
@@ -99,9 +111,15 @@ ol.q li::before{
   content:counter(q,decimal-leading-zero); position:absolute; left:0; top:3px;
   font-family:var(--mono); font-size:12px; color:var(--coral);
 }
+ol.q.want li::before{color:var(--muted)}
+
+code{
+  font-family:var(--mono); font-size:.84em; background:rgba(19,26,25,.055);
+  border:1px solid var(--line); border-radius:4px; padding:1px 5px; white-space:nowrap;
+}
 
 .cal{border-top:1px solid var(--line); margin-top:6px}
-.cal div{display:grid; grid-template-columns:118px 1fr; gap:18px; padding:13px 0; border-bottom:1px solid var(--line)}
+.cal div{display:grid; grid-template-columns:150px 1fr; gap:18px; padding:13px 0; border-bottom:1px solid var(--line)}
 .cal b{font-family:var(--mono); font-size:12px; font-weight:400; color:var(--muted); letter-spacing:.04em; padding-top:2px}
 .cal span{font-size:16.5px}
 
@@ -109,6 +127,9 @@ footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line); font
 
 @media (max-width:620px){
   body{font-size:17px}
+  .pan{padding-bottom:8px}
+  .pan svg{min-width:660px}
+  .hint{display:block; font-family:var(--mono); font-size:10.5px; color:var(--muted); margin-top:8px}
   .controls{grid-template-columns:1fr}
   .item{grid-template-columns:1fr; gap:6px}
   .item .tag{padding-top:0}
@@ -122,15 +143,146 @@ footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line); font
 <div class="wrap">
 
 <header>
-  <div class="eyebrow">Nota de escopo · TG · ITA</div>
-  <h1>Quando a defesa vira o ataque</h1>
-  <p class="thesis">Um sistema distribuído pode cair por causa de um pico de tráfego e <em>continuar caído depois que o pico passa</em> — porque o mecanismo que existe para protegê-lo passou a alimentá-lo.</p>
+  <div class="eyebrow">Nota de escopo · TG · ITA · Engineering Resilient Distributed Systems</div>
+  <h1>A esteira e a espiral</h1>
+  <p class="thesis">Cinco etapas — modelo de falha, modelo de carga, cenário, observação, mitigação — percorridas em espiral sobre um serviço de exemplo, até <em>reproduzir em bancada uma falha metaestável</em>: o caso em que o sistema não volta sozinho depois que o gatilho já foi embora.</p>
+  <nav class="toc">
+    <a href="#esteira">A esteira</a>
+    <a href="#fenomeno">O fenômeno</a>
+    <a href="#bancada">A bancada</a>
+    <a href="#etapas">Etapas</a>
+    <a href="#leituras">Leituras</a>
+    <a href="#reuniao">Reunião</a>
+  </nav>
 </header>
 
-<section>
-  <div class="rule"><span>Simulador</span><i></i></div>
+<section id="esteira">
+  <div class="rule"><span>A esteira</span><i></i></div>
+  <h2>O que o rascunho da professora descreve</h2>
+
+  <p>O rascunho lista cinco coisas: modelos de falha e injeção de falha, modelos de carga, chaos engineering, teste e observabilidade, e mecanismos de mitigação. Lidas soltas, parecem cinco assuntos. Lidas na ordem, são <strong>uma esteira</strong>: cada etapa produz a entrada da seguinte, e o conjunto é um método de ponta a ponta para medir como um serviço responde a estresse.</p>
+
+  <p>Uma falha e uma carga se combinam num cenário. O cenário roda contra um sistema instrumentado. A instrumentação produz números. Os números dizem se o serviço aguentou. Quando não aguentou, entra um mecanismo de mitigação — e é aí que a esteira deixa de ser linha reta, porque o mecanismo novo muda o sistema e obriga a refazer os cenários. É a espiral que ela aponta no final do rascunho.</p>
+
+  <p>A última linha do rascunho — <em>"e vamos ver se conseguimos demonstrar uma falha metaestável"</em> — é o que dá destino à esteira. Sem um alvo, montar bancada e injetar falha rende um catálogo de gráficos de latência. Com o alvo, cada etapa existe por um motivo: a falha metaestável é justamente o fenômeno que <strong>só aparece se as cinco etapas estiverem certas ao mesmo tempo</strong>. Carga fechada em vez de aberta, e ela não aparece. Sem medir depois do gatilho, e ela não aparece. Sem retry no cliente, e ela não aparece.</p>
+
+  <div class="callout" style="border-left-color:var(--teal)"><strong>Sob quais condições de carga e de configuração a própria estratégia de resiliência passa a ser a causa da indisponibilidade — e quais mitigações de fato quebram o laço de realimentação?</strong></div>
+
+  <p>Essa é a pergunta que a esteira serve para responder. O que segue é cada etapa dela, com a ferramenta correspondente e a decisão que precisa ser tomada.</p>
+
+  <figure>
+    <div class="pan"><svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ft ft2">
+      <title id="ft">A esteira de cinco etapas e a espiral de realimentação</title>
+      <desc id="ft2">Modelo de falha e modelo de carga se combinam num cenário. O cenário roda na bancada instrumentada, que responde se o goodput volta sozinho depois do gatilho. Se não volta, é a falha metaestável e entra uma mitigação — que devolve o trabalho para a etapa de cenário, fechando a espiral. Se volta, o cenário volta para os modelos de falha e de carga para ser endurecido.</desc>
+      <defs><marker id="fa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+      <rect x="250" y="30" width="150" height="52" rx="9" fill="#EEF2F1" stroke="#9AA7A4" stroke-width="0.6"/>
+      <text x="325" y="54" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#131A19">Modelo de falha</text>
+      <text x="325" y="71" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">crash · perda · delay</text>
+
+      <rect x="410" y="30" width="150" height="52" rx="9" fill="#EEF2F1" stroke="#9AA7A4" stroke-width="0.6"/>
+      <text x="485" y="54" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#131A19">Modelo de carga</text>
+      <text x="485" y="71" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">aberta · pico · retry</text>
+
+      <line x1="325" y1="82" x2="325" y2="99" stroke="#9AA7A4" stroke-width="1.2"/>
+      <line x1="485" y1="82" x2="485" y2="99" stroke="#9AA7A4" stroke-width="1.2"/>
+      <line x1="325" y1="99" x2="485" y2="99" stroke="#9AA7A4" stroke-width="1.2"/>
+      <line x1="405" y1="99" x2="405" y2="112" stroke="#9AA7A4" stroke-width="1.2" marker-end="url(#fa)"/>
+      <text x="572" y="103" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">combinações</text>
+
+      <rect x="250" y="114" width="310" height="52" rx="9" fill="#EEF2F1" stroke="#9AA7A4" stroke-width="0.6"/>
+      <text x="405" y="138" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#131A19">Cenário</text>
+      <text x="405" y="155" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">carga base × gatilho × configuração</text>
+
+      <line x1="405" y1="166" x2="405" y2="198" stroke="#9AA7A4" stroke-width="1.2" marker-end="url(#fa)"/>
+      <text x="572" y="186" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">n repetições</text>
+
+      <rect x="250" y="200" width="310" height="52" rx="9" fill="#EEF2F1" stroke="#9AA7A4" stroke-width="0.6"/>
+      <text x="405" y="224" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#131A19">Bancada instrumentada</text>
+      <text x="405" y="241" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">goodput · p99 · fila · retries</text>
+
+      <line x1="405" y1="252" x2="405" y2="284" stroke="#9AA7A4" stroke-width="1.2" marker-end="url(#fa)"/>
+      <text x="572" y="272" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">métricas</text>
+
+      <rect x="270" y="286" width="270" height="46" rx="23" fill="#F8FAF9" stroke="#B0402A" stroke-width="0.8" stroke-dasharray="4 4"/>
+      <text x="405" y="314" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#7E2C1B">o goodput volta sozinho?</text>
+
+      <line x1="405" y1="332" x2="405" y2="364" stroke="#B0402A" stroke-width="1.2" marker-end="url(#fa)"/>
+      <text x="414" y="352" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#B0402A">não — é a falha metaestável</text>
+
+      <rect x="250" y="366" width="310" height="52" rx="9" fill="#E1F0EA" stroke="#0F6E56" stroke-width="0.6"/>
+      <text x="405" y="390" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#0B4E3D">Mitigação</text>
+      <text x="405" y="407" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#3F6C60">backoff · budget · breaker · shed</text>
+
+      <path d="M250 392 L115 392 L115 140 L246 140" fill="none" stroke="#0F6E56" stroke-width="1" stroke-dasharray="5 5" marker-end="url(#fa)"/>
+      <text x="182" y="368" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#0F6E56">mecanismo novo</text>
+      <text x="182" y="382" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#0F6E56">→ novos cenários</text>
+
+      <path d="M540 309 L690 309 L690 56 L564 56" fill="none" stroke="#9AA7A4" stroke-width="1" stroke-dasharray="5 5" marker-end="url(#fa)"/>
+      <text x="615" y="301" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">sim</text>
+    </svg></div>
+    <figcaption><span class="hint">→ arraste o diagrama para o lado</span>A esteira não termina: cada mitigação adicionada muda o sistema e devolve o trabalho para a etapa de cenário — a espiral, em verde. O ramo pontilhado da direita é o caso em que o experimento não produziu o fenômeno: o goodput voltou sozinho, então o cenário estava fraco demais e é a carga ou a falha que precisa endurecer.</figcaption>
+  </figure>
+
+  <div class="stack steps">
+    <div class="item">
+      <div class="tag"><span class="num">01</span> Falha</div>
+      <div>
+        <h4>Escolher a taxonomia antes de escolher a ferramenta</h4>
+        <p>A professora sugere reusar uma taxonomia existente, e essa é a decisão certa: inventar classificação de falha é trabalho perdido e indefensável na banca. A referência canônica é Avizienis et al., que separa <strong>falta</strong> (a causa injetada), <strong>erro</strong> (o estado interno corrompido) e <strong>falha</strong> (o que o usuário vê). A distinção importa muito aqui, porque o TG mede a terceira em função da primeira.</p>
+        <p>O corte prático é o que ela já indicou: <strong>processo</strong> (crash, crash com restart, e pausa longa) e <strong>comunicação</strong> (perda de mensagem, delay, partição). Vale acrescentar a pausa longa — <code>docker pause</code> — porque é a mais cruel das três de processo: o processo não morre, então nada detecta, e todos os clientes ficam pendurados até o timeout. É o gatilho clássico de metaestabilidade.</p>
+        <p>Falha bizantina fica fora, e é bom dizer isso explicitamente no texto: é outro modelo de ameaça, exige consenso tolerante a bizantinos para fazer sentido, e dobraria o trabalho sem tocar na pergunta.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag"><span class="num">02</span> Carga</div>
+      <div>
+        <h4>Sistema aberto ou o fenômeno não aparece</h4>
+        <p>Esta é a etapa em que dá mais fácil de errar, e o erro é silencioso. Gerador de carga tem dois modos. No <strong>modo fechado</strong> — no k6, os executores <code>constant-vus</code> e <code>ramping-vus</code> — existem N usuários virtuais e cada um só manda o próximo pedido depois de receber a resposta do anterior. No <strong>modo aberto</strong> — <code>constant-arrival-rate</code> e <code>ramping-arrival-rate</code> — a taxa de chegada é fixa e independe de quanto o serviço demora.</p>
+        <p>Se o teste usa modo fechado, o próprio gerador se autolimita quando o serviço fica lento, o laço de realimentação nunca fecha, e <strong>a falha metaestável é matematicamente impossível de reproduzir</strong>. O trabalho pode rodar seis meses de experimento e concluir que o fenômeno não existe, por causa de uma linha de configuração. Schroeder, Wierman e Harchol-Balter escreveram um paper inteiro sobre esse tipo de erro.</p>
+        <p>Um segundo ponto de enquadramento: <strong>o timeout e o retry do cliente fazem parte do modelo de carga</strong>, não do sistema sob teste. É o cliente que decide desistir e pedir de novo, e é essa decisão que amplifica λ. Tratá-los como parâmetro de carga, e não como detalhe de implementação do serviço, é o que torna o experimento controlável.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag"><span class="num">03</span> Cenário</div>
+      <div>
+        <h4>A pergunta dela: como montar os cenários?</h4>
+        <p>A resposta é não improvisar. Um cenário precisa de três partes. Primeiro, uma <strong>hipótese de estado estável</strong> declarada em número antes de rodar — por exemplo "goodput acima de 95% de λ e p99 abaixo de 400 ms". É o que a literatura de chaos engineering coloca no centro do método: o experimento existe para tentar refutar uma afirmação, não para ver o que acontece.</p>
+        <p>Segundo, um <strong>desenho de experimento</strong> em vez de uma lista de anedotas. Os fatores são carga base como fração de μ, tipo de gatilho, configuração de timeout e retry do cliente, e mitigação ativa. O fatorial completo explode, então o caminho é varrer um fator por vez em volta de um ponto de referência, e registrar por que cada ponto foi escolhido. É exatamente o assunto do livro do Raj Jain, e é o que separa um capítulo de resultados de uma coleção de prints do Grafana.</p>
+        <p>Terceiro, e é o que quase nenhum teste de carga faz: <strong>o cenário tem que continuar medindo depois que o gatilho termina</strong>. Metaestabilidade só existe na janela pós-gatilho. Um teste que injeta pico, mede o pico e para, não consegue distinguir um sistema que se recupera de um que ficou preso — os dois têm o mesmo gráfico durante o pico.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag"><span class="num">04</span> Observação</div>
+      <div>
+        <h4>Duas métricas que quase ninguém coleta</h4>
+        <p>O básico é conhecido: latência em percentis e não em média, taxa de erro, utilização e saturação de cada recurso. Sobre isso, duas medidas específicas fazem o trabalho.</p>
+        <p>A primeira é o <strong>fator de amplificação</strong>: pedidos que o servidor recebe divididos por pedidos que os clientes originaram. Em repouso vale 1. Quando o laço fecha, sobe. É a observação direta do mecanismo, e é o que transforma "o sistema caiu" em "o sistema caiu porque a carga triplicou sozinha".</p>
+        <p>A segunda é o <strong>tempo de recuperação após a remoção do gatilho</strong>. É a definição operacional de metaestabilidade: se o goodput não volta ao patamar anterior dentro de um múltiplo declarado da duração do gatilho, o sistema está no estado metaestável. Escolher esse múltiplo e defendê-lo é uma decisão de método que o TG precisa tomar cedo.</p>
+        <p>Vale registrar também que <strong>goodput se mede no cliente</strong>, não no servidor. Só o cliente sabe se ainda queria a resposta quando ela chegou. Um servidor a cem por cento de CPU produzindo respostas para pedidos abandonados reporta throughput excelente.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag"><span class="num">05</span> Mitigação</div>
+      <div>
+        <h4>A espiral é onde está a contribuição</h4>
+        <p>Os mecanismos estão descritos mais abaixo. O que a espiral acrescenta é o ponto interessante: <strong>medir um mecanismo isolado diz pouco</strong>. Já se sabe que backoff com jitter melhora as coisas. O que não está resolvido na literatura é o que acontece quando três mecanismos configurados de forma independente convivem no mesmo caminho de requisição.</p>
+        <p>Um exemplo concreto do problema: load shedding recusa trabalho rápido, produzindo erros rápidos; o circuit breaker do cliente lê erro rápido como falha e abre; com o breaker aberto, a carga cai e o shedding para de recusar; o breaker fecha, a carga volta de uma vez, e o shedding volta a recusar. O sistema oscila, e nenhum dos dois mecanismos está com defeito.</p>
+        <p>A professora escreve que a espiral aumenta a complexidade e exige mais teste. É verdade, e por isso ela precisa de um critério de parada declarado no escopo — proposta: <strong>duas voltas</strong>. Na primeira, um mecanismo medido antes e depois. Na segunda, dois mecanismos interagindo. Depois disso, congela e escreve.</p>
+        <p>Replicação, que ela cita junto com retry, merece uma nota crítica: ela protege contra falha de processo, mas <strong>também é amplificador</strong> sob sobrecarga. Requisição especulativa contra a segunda réplica, read repair e retry contra outro nó todos multiplicam λ justamente quando λ já é o problema. É um bom candidato a resultado do trabalho.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="fenomeno">
+  <div class="rule"><span>O fenômeno</span><i></i></div>
   <h2>Veja o laço fechar</h2>
-  <p>Um servidor com capacidade fixa recebendo pedidos. Quando um pedido espera demais, o cliente desiste e pede de novo — e esse pedido novo entra na mesma fila. Suba a carga base para perto da capacidade, injete um pico e observe o que acontece <em>depois</em> que o pico termina.</p>
+  <p>Antes das ferramentas, o alvo. Um servidor com capacidade fixa recebendo pedidos. Quando um pedido espera demais, o cliente desiste e pede de novo — e esse pedido novo entra na mesma fila. Suba a carga base para perto da capacidade, injete um pico e observe o que acontece <em>depois</em> que o pico termina.</p>
 
   <div class="panel">
     <h3>Goodput sob carga</h3>
@@ -171,13 +323,12 @@ footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line); font
   </div>
 
   <p style="margin-top:22px">Com retry imediato e carga base alta, o pico termina e o goodput não volta. Troque para backoff ou retry budget e repita o experimento: o sistema afunda durante o pico, mas se recupera sozinho depois. <strong>Essa diferença é o objeto do trabalho.</strong></p>
-</section>
 
-<section>
-  <div class="rule"><span>O problema</span><i></i></div>
-  <h2>Em linguagem simples</h2>
+  <div class="callout"><strong>Este simulador é uma maquete.</strong> São cinquenta linhas de JavaScript com uma fila e um contador — não tem rede, não tem processo para matar, não tem contenção de recurso real. Ele serve para fixar a intuição e para escolher onde olhar. A esteira existe justamente para reproduzir o mesmo comportamento em containers de verdade, onde ele pode não aparecer, aparecer diferente, ou aparecer por outro motivo — e é essa diferença que vira resultado.</div>
 
-  <p>Comece por uma distinção que sustenta o resto. Num <strong>sistema fechado</strong>, o número de clientes é fixo: se o servidor fica lento, cada cliente espera, e o trabalho novo diminui naturalmente. Num <strong>sistema aberto</strong>, a carga vem de fora e não te consulta — se o servidor fica lento, os pedidos continuam chegando no mesmo ritmo. Toda a web é sistema aberto.</p>
+  <h2 style="margin-top:52px">Em linguagem simples</h2>
+
+  <p>Comece por uma distinção que sustenta o resto. Num <strong>sistema fechado</strong>, o número de clientes é fixo: se o servidor fica lento, cada cliente espera, e o trabalho novo diminui naturalmente. Num <strong>sistema aberto</strong>, a carga vem de fora e não te consulta — se o servidor fica lento, os pedidos continuam chegando no mesmo ritmo. Toda a web é sistema aberto. É a mesma distinção que reaparece na etapa 02 como uma escolha de configuração do k6, e é por isso que ela está aqui no começo.</p>
 
   <p>Junte com capacidade. Um serviço processa até μ pedidos por segundo e recebe λ. Enquanto λ é menor que μ, a fila fica estável. Quando λ ultrapassa μ, a fila cresce sem limite e a latência explode. Isso é teoria de filas básica, e é a única matemática necessária para entender o resto.</p>
 
@@ -190,7 +341,7 @@ footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line); font
   <p>Ele está num estado localmente estável, do qual só sai com um empurrão externo. Daí o nome, emprestado da física. É exatamente por isso que reiniciar tudo funciona: você drena as filas e quebra o laço à força.</p>
 
   <figure>
-    <svg viewBox="0 0 680 352" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="svgt svgd">
+    <div class="pan"><svg viewBox="0 0 680 352" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="svgt svgd">
       <title id="svgt">Os três estados de uma falha metaestável</title>
       <desc id="svgd">Do estado estável ao vulnerável quando a carga cresce, e do vulnerável ao metaestável quando ocorre um gatilho. Uma seta tracejada indica que o sistema não retorna sozinho.</desc>
       <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
@@ -215,8 +366,8 @@ footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line); font
 
       <path d="M196 279 L88 279 L88 67 L192 67" fill="none" stroke="#9AA7A4" stroke-width="1" stroke-dasharray="5 5" marker-end="url(#ar)"/>
       <text x="30" y="334" font-family="JetBrains Mono,monospace" font-size="11.5" fill="#5A6866">o gatilho vai embora, mas o sistema não volta sozinho</text>
-    </svg>
-    <figcaption>O estado do meio é o cruel: rodar com pouca folga é desejável, porque folga é hardware ocioso. Praticamente todo sistema bem operado passa a maior parte do tempo ali, de propósito. A vulnerabilidade é o preço da eficiência.</figcaption>
+    </svg></div>
+    <figcaption><span class="hint">→ arraste o diagrama para o lado</span>O estado do meio é o cruel: rodar com pouca folga é desejável, porque folga é hardware ocioso. Praticamente todo sistema bem operado passa a maior parte do tempo ali, de propósito. A vulnerabilidade é o preço da eficiência.</figcaption>
   </figure>
 
   <h3>Retry não é o único amplificador</h3>
@@ -226,57 +377,128 @@ footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line); font
   <p><strong>Backoff exponencial com jitter</strong> faz o cliente esperar cada vez mais entre tentativas, com aleatoriedade para não sincronizar todo mundo. <strong>Retry budget</strong> limita retries a uma fração do tráfego normal, tipicamente via token bucket, de modo que o retry nunca multiplique a carga além de um fator conhecido. <strong>Circuit breaker</strong> é uma máquina de estados no cliente que, após N falhas, para de tentar por um tempo e depois testa o terreno com poucos pedidos. <strong>Load shedding</strong> é o servidor recusar trabalho na entrada para proteger o que já aceitou. E <strong>propagação de deadline</strong> faz o pedido carregar consigo quanto tempo ainda resta, para ninguém gastar CPU num trabalho que já perdeu a validade.</p>
 </section>
 
-<section>
-  <div class="rule"><span>Proposta</span><i></i></div>
-  <h2>O recorte que estamos considerando</h2>
+<section id="bancada">
+  <div class="rule"><span>A bancada</span><i></i></div>
+  <h2>O sistema de exemplo</h2>
 
-  <p>O tema original da professora — projetar e avaliar estratégias de escalabilidade para aplicações distribuídas, cobrindo balanceamento de carga, orquestração e chaos engineering — tem um risco embutido na forma como está escrito. "Mostrar a necessidade de distribuição para garantir disponibilidade" já traz a conclusão dada: ninguém defende que distribuir não ajuda. Sem uma pergunta afiada, o trabalho vira um catálogo de gráficos de latência sem tese.</p>
+  <p>O rascunho diz que provavelmente é preciso definir um sistema de exemplo, e que os componentes podem ficar mais complexos depois. A proposta é começar com o menor sistema que ainda tem um gargalo de verdade: quatro containers e um proxy, num <code>docker compose</code>, rodando num laptop.</p>
 
-  <p>A proposta é manter o escopo e trocar a pergunta:</p>
+  <figure>
+    <div class="pan"><svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bt bt2">
+      <title id="bt">Topologia da bancada e pontos de injeção</title>
+      <desc id="bt2">O gerador de carga k6 envia requisições em modo aberto para a API, que chama o serviço. O serviço tem um pool fixo de workers que define a capacidade, consulta o cache Redis em cache-aside e o banco Postgres através do Toxiproxy. A falha de processo é injetada na API por crash e restart; a falha de comunicação é injetada no Toxiproxy como delay e perda. Prometheus e Grafana coletam métricas da API, do serviço e do banco.</desc>
+      <defs><marker id="ba" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
 
-  <div class="callout" style="border-left-color:var(--teal)"><strong>Sob quais condições de carga e de configuração a própria estratégia de resiliência passa a ser a causa da indisponibilidade — e quais mitigações de fato quebram o laço de realimentação?</strong></div>
+      <text x="69" y="112" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#A96B0D">sistema aberto</text>
+      <line x1="69" y1="119" x2="69" y2="128" stroke="#A96B0D" stroke-width="1"/>
+      <rect x="14" y="130" width="110" height="56" rx="9" fill="#EEF2F1" stroke="#9AA7A4" stroke-width="0.6"/>
+      <text x="69" y="155" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#131A19">Carga</text>
+      <text x="69" y="172" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">k6</text>
 
-  <p>Isso entrega as mesmas diretrizes de distribuição que ela pediu, mas com contribuição real, e conecta com uma linha de pesquisa viva na literatura de sistemas.</p>
+      <line x1="124" y1="158" x2="160" y2="158" stroke="#9AA7A4" stroke-width="1.2" marker-end="url(#ba)"/>
 
-  <h3>Três camadas</h3>
-  <div class="stack">
-    <div class="item">
-      <div class="tag">Analítica</div>
-      <div>
-        <h4>Modelar antes de medir</h4>
-        <p>Teoria de filas para prever o ponto de saturação e o regime de colapso. A tese vira "o modelo prevê X, o sistema faz Y, e a diferença se explica por Z" — o que transforma um relatório de benchmark num trabalho com espinha dorsal.</p>
-      </div>
-    </div>
-    <div class="item">
-      <div class="tag">Empírica</div>
-      <div>
-        <h4>Reproduzir em ambiente controlado</h4>
-        <p>Uma aplicação pequena, com um gargalo deliberado, submetida a carga sintética e injeção de falha. Instrumento de laboratório, não produto.</p>
-      </div>
-    </div>
-    <div class="item">
-      <div class="tag">Prática</div>
-      <div>
-        <h4>Avaliar as mitigações e concluir</h4>
-        <p>Backoff, jitter, retry budget, circuit breaker e load shedding comparados sistematicamente sob os mesmos cenários, resultando em diretrizes justificadas em vez de folclore de engenharia.</p>
-      </div>
-    </div>
-  </div>
+      <text x="224" y="112" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#B0402A">crash · restart</text>
+      <line x1="224" y1="119" x2="224" y2="128" stroke="#B0402A" stroke-width="1"/>
+      <rect x="164" y="130" width="120" height="56" rx="9" fill="#EEF2F1" stroke="#9AA7A4" stroke-width="0.6"/>
+      <text x="224" y="155" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#131A19">API</text>
+      <text x="224" y="172" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">timeout + retry</text>
 
-  <h3>Ferramental sem custo de rampa</h3>
-  <p>k6 ou Locust para gerar carga, Toxiproxy para injetar latência e falha de rede, Prometheus e Grafana para métricas, k3s ou kind se houver orquestração. Nada de nuvem paga: o fenômeno reproduz em três containers num laptop, e cloud gerenciada só troca tempo de pesquisa por tempo de configuração de IAM.</p>
+      <line x1="284" y1="158" x2="320" y2="158" stroke="#9AA7A4" stroke-width="1.2" marker-end="url(#ba)"/>
+
+      <rect x="324" y="34" width="140" height="56" rx="9" fill="#EEF2F1" stroke="#9AA7A4" stroke-width="0.6"/>
+      <text x="394" y="59" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#131A19">Cache</text>
+      <text x="394" y="76" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">Redis</text>
+      <line x1="394" y1="90" x2="394" y2="126" stroke="#9AA7A4" stroke-width="1.2" marker-start="url(#ba)" marker-end="url(#ba)"/>
+      <text x="402" y="111" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">cache-aside</text>
+
+      <rect x="324" y="130" width="140" height="56" rx="9" fill="#EEF2F1" stroke="#9AA7A4" stroke-width="0.6"/>
+      <text x="394" y="155" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#131A19">Serviço</text>
+      <text x="394" y="172" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">pool fixo = μ</text>
+
+      <line x1="464" y1="158" x2="490" y2="158" stroke="#9AA7A4" stroke-width="1.2" marker-end="url(#ba)"/>
+
+      <text x="529" y="112" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#B0402A">delay · perda</text>
+      <line x1="529" y1="119" x2="529" y2="139" stroke="#B0402A" stroke-width="1"/>
+      <rect x="494" y="141" width="70" height="34" rx="7" fill="#F8FAF9" stroke="#B0402A" stroke-width="0.8" stroke-dasharray="4 4"/>
+      <text x="529" y="162" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#7E2C1B">toxiproxy</text>
+
+      <line x1="568" y1="158" x2="580" y2="158" stroke="#9AA7A4" stroke-width="1.2" marker-end="url(#ba)"/>
+
+      <rect x="584" y="130" width="110" height="56" rx="9" fill="#EEF2F1" stroke="#9AA7A4" stroke-width="0.6"/>
+      <text x="639" y="155" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#131A19">Banco</text>
+      <text x="639" y="172" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">Postgres</text>
+
+      <line x1="224" y1="186" x2="224" y2="238" stroke="#9AA7A4" stroke-width="1" stroke-dasharray="4 4"/>
+      <line x1="394" y1="186" x2="394" y2="238" stroke="#9AA7A4" stroke-width="1" stroke-dasharray="4 4"/>
+      <line x1="639" y1="186" x2="639" y2="238" stroke="#9AA7A4" stroke-width="1" stroke-dasharray="4 4"/>
+
+      <rect x="164" y="240" width="530" height="52" rx="9" fill="#F8FAF9" stroke="#9AA7A4" stroke-width="0.8" stroke-dasharray="4 4"/>
+      <text x="429" y="263" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="14.5" font-weight="600" fill="#131A19">Prometheus + Grafana</text>
+      <text x="429" y="280" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">goodput · amplificação de retry · tempo de recuperação</text>
+
+      <rect x="14" y="306" width="9" height="9" rx="2" fill="#B0402A"/>
+      <text x="30" y="315" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">falha injetada</text>
+      <rect x="150" y="306" width="9" height="9" rx="2" fill="#A96B0D"/>
+      <text x="166" y="315" font-family="JetBrains Mono,monospace" font-size="10.5" fill="#5A6866">carga aplicada</text>
+    </svg></div>
+    <figcaption><span class="hint">→ arraste o diagrama para o lado</span>O pool fixo do serviço é o gargalo deliberado: é ele que torna μ conhecido e ajustável, e é contra μ que a carga base é calibrada para colocar o sistema no estado vulnerável. O Toxiproxy fica no caminho da dependência, e não dentro do serviço, para que delay e perda sejam injetados sem tocar em uma linha de código do sistema sob teste.</figcaption>
+  </figure>
+
+  <h3>Por que este desenho e não outro</h3>
+  <p>Três razões. O <strong>pool fixo</strong> é a mais importante: um serviço com número limitado de workers tem capacidade conhecida, o que permite comparar o que a teoria de filas prevê com o que a bancada mede — sem isso, μ é uma incógnita e não há modelo para confrontar. O <strong>cache</strong> entra porque é o segundo amplificador clássico, e tê-lo desde o início evita reconstruir a bancada quando o TG quiser mostrar que o fenômeno não é exclusivo do retry. E o <strong>proxy</strong> separa a injeção de falha do código da aplicação, o que é o que torna o experimento honesto: o serviço não sabe que está sendo testado.</p>
+
+  <p>Nada de nuvem paga. O fenômeno reproduz em meia dúzia de containers num laptop, e cloud gerenciada troca tempo de pesquisa por tempo de configuração de IAM. Se depois for preciso mostrar orquestração e réplicas, k3s ou kind resolvem localmente.</p>
+
+  <h3>Não construir do zero no primeiro semestre</h3>
+  <p>O artigo do OSDI '22 publicou <a href="https://github.com/lexiangh/Metastability">o código dos reprodutores</a> que ele usa — aplicações pequenas que já exibem cada tipo de falha metaestável em ambiente controlado. Rodar isso primeiro responde a pergunta mais arriscada do TG — "eu consigo reproduzir o fenômeno?" — antes de qualquer linha de código próprio, e dá um ponto de referência para saber se a bancada nova está funcionando ou apenas quieta. Trocar por um serviço próprio depois é barato; descobrir em agosto que o fenômeno não reproduz, não é.</p>
+
+  <h3>Ferramental</h3>
+  <p><a href="https://grafana.com/docs/k6/latest/using-k6/scenarios/executors/">k6</a> para carga, com executor de taxa de chegada. <a href="https://github.com/Shopify/toxiproxy">Toxiproxy</a> para falha de rede, controlado por API HTTP — o que importa aqui é que o cenário fica scriptável e portanto reprodutível. Docker para falha de processo, com <code>kill</code>, <code>restart</code> e <code>pause</code>. Prometheus e Grafana para métricas. Tudo com documentação boa e curva de aprendizado de dias, não de meses.</p>
+</section>
+
+<section id="etapas">
+  <div class="rule"><span>Escopo</span><i></i></div>
+  <h2>Etapas necessárias e desejáveis</h2>
+
+  <p>O e-mail pede exatamente isso: definir melhor as etapas necessárias e as desejadas. A separação abaixo é uma proposta para a reunião — a lista de cima é o que precisa existir para o trabalho fechar, e a de baixo é o que agrega se sobrar tempo. A intenção é ter um TG defensável mesmo no cenário em que nada da segunda lista acontece.</p>
+
+  <h3>Necessário</h3>
+  <ol class="q">
+    <li>Taxonomia de falhas escolhida e justificada, com duas classes efetivamente injetáveis: processo e comunicação.</li>
+    <li>Modelo de carga em sistema aberto, com carga base parametrizada em fração de μ, gatilho definido e <strong>janela de medição depois do gatilho</strong>.</li>
+    <li>Bancada de quatro containers e um proxy, com μ conhecido e ajustável, congelada a partir de uma data.</li>
+    <li>Plano de experimentos escrito antes de rodar, com hipótese de estado estável em número e justificativa de cada ponto do espaço de fatores.</li>
+    <li>Observabilidade cobrindo goodput medido no cliente, fator de amplificação e tempo de recuperação, com repetições e variabilidade reportada.</li>
+    <li>Uma volta completa da espiral: um mecanismo de mitigação, medido antes e depois, nos mesmos cenários.</li>
+    <li>Uma falha metaestável reproduzida em bancada — ou, se não reproduzir, a demonstração fundamentada de qual condição faltou. <strong>Esse resultado negativo também é resultado</strong>, e é o que protege o trabalho.</li>
+  </ol>
+
+  <h3>Desejável</h3>
+  <ol class="q want">
+    <li>Modelo analítico de fila que prevê o ponto de virada, confrontado com a medição.</li>
+    <li>Segunda volta da espiral, com dois mecanismos interagindo — onde está a parte mais original do trabalho.</li>
+    <li>Cache frio como segundo amplificador, mostrando que o fenômeno não é exclusividade do retry.</li>
+    <li>Orquestração e replicação, incluindo o caso em que a réplica amplifica em vez de proteger.</li>
+    <li>Diretrizes de configuração como entregável final, no lugar de apenas um capítulo de resultados.</li>
+  </ol>
+
+  <h3>A camada analítica</h3>
+  <p>Vale destacar por que o item 1 da lista desejável é mais interessante do que parece. O trabalho de outubro de 2025 no arXiv aponta que <strong>modelos de fila padrão como o M/M/c simplesmente não exibem metaestabilidade</strong> — falta neles alguma coisa, e a candidata natural é justamente o laço de realimentação do retry, que um modelo com λ exógeno não tem como representar. Modelar antes de medir transforma a tese de "medimos e deu isso" em "o modelo prevê X, a bancada faz Y, e a diferença se explica por Z". É o que dá espinha dorsal a um trabalho experimental.</p>
 
   <h3>Calendário</h3>
+  <p>Proposta a validar na reunião, assumindo entrega no fim de 2027.</p>
   <div class="cal">
-    <div><b>Jan – Mar</b><span>Construir e instrumentar. Congelar a aplicação em março e não mexer mais.</span></div>
-    <div><b>Abr</b><span>Escrever o capítulo de metodologia. Não deixar para setembro.</span></div>
-    <div><b>Abr – Ago</b><span>Rodar experimentos.</span></div>
-    <div><b>Set – Nov</b><span>Escrever.</span></div>
+    <div><b>Set – Out 2026</b><span>Investigação inicial: leituras, rodar os reprodutores do OSDI '22, escolher taxonomia e ferramental.</span></div>
+    <div><b>Nov – Dez 2026</b><span>Fechar escopo com a professora e definir o sistema de exemplo.</span></div>
+    <div><b>Jan – Mar 2027</b><span>Construir e instrumentar a bancada. Congelar em março e não mexer mais.</span></div>
+    <div><b>Abr 2027</b><span>Escrever o capítulo de metodologia. Não deixar para setembro.</span></div>
+    <div><b>Abr – Ago 2027</b><span>Rodar as voltas da espiral.</span></div>
+    <div><b>Set – Nov 2027</b><span>Escrever.</span></div>
   </div>
   <p style="margin-top:20px">Toda vez que bater vontade de melhorar a aplicação, é sinal de fuga do experimento. O que mata TG de quem trabalha não é a bancada — é a escrita empurrada para o fim.</p>
 </section>
 
-<section>
+<section id="leituras">
   <div class="rule"><span>Leituras</span><i></i></div>
   <h2>Por onde começar</h2>
 
@@ -309,6 +531,33 @@ footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line); font
     </div>
 
     <div class="item">
+      <div class="tag">Taxonomia</div>
+      <div>
+        <h4><a href="https://ieeexplore.ieee.org/document/1335465">Basic Concepts and Taxonomy of Dependable and Secure Computing</a></h4>
+        <p>Avizienis, Laprie, Randell e Landwehr. A taxonomia que a professora pede para reusar, e a fonte da distinção entre falta, erro e falha. É um artigo longo e de leitura seca, mas basta a parte de classificação de faltas para fundamentar o capítulo de modelo de falha.</p>
+        <div class="meta">IEEE Transactions on Dependable and Secure Computing · 2004</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag">Carga</div>
+      <div>
+        <h4><a href="https://www.usenix.org/conference/nsdi-06/open-versus-closed-cautionary-tale">Open Versus Closed: A Cautionary Tale</a></h4>
+        <p>Schroeder, Wierman e Harchol-Balter. Mostra que sistema aberto e sistema fechado se comportam de forma qualitativamente diferente sob a mesma carga nominal, e que escolher o modelo errado no gerador de carga inverte conclusões. É a referência que justifica a escolha de executor do k6 na etapa 02 — a decisão de método mais barata e mais fácil de errar de todo o TG.</p>
+        <div class="meta">NSDI 2006 · USENIX</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag">Chaos</div>
+      <div>
+        <h4><a href="https://ieeexplore.ieee.org/document/7436642">Chaos Engineering</a></h4>
+        <p>Basiri et al., do time da Netflix. O artigo que formaliza a prática como experimento científico em vez de "quebrar coisas em produção": hipótese de estado estável declarada antes, variável independente controlada, e refutação. É o que responde à pergunta de como montar os cenários. Complementa os <a href="https://principlesofchaos.org/">princípios</a>, que são mais curtos e mais citáveis.</p>
+        <div class="meta">IEEE Software 33(3) · 2016</div>
+      </div>
+    </div>
+
+    <div class="item">
       <div class="tag">Matemática</div>
       <div>
         <h4><a href="https://arxiv.org/abs/2510.03551">Formal Analysis of Metastable Failures in Software Systems</a></h4>
@@ -321,8 +570,17 @@ footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line); font
       <div class="tag">Método</div>
       <div>
         <h4><a href="https://onlinelibrary.wiley.com/doi/10.1002/spe.3368">A declarative approach and benchmark tool for controlled evaluation of microservice resiliency patterns</a></h4>
-        <p>Aderaldo et al. Desenho experimental reutilizável: cenários especificados declarativamente para medir o impacto de desempenho de retry e circuit breaker sob carga e falha variadas.</p>
+        <p>Aderaldo et al. Desenho experimental reutilizável: cenários especificados declarativamente para medir o impacto de desempenho de retry e circuit breaker sob carga e falha variadas. O mais próximo que existe de um molde pronto para a esteira deste TG.</p>
         <div class="meta">Software: Practice and Experience · 2025</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag">Prático</div>
+      <div>
+        <h4><a href="https://sre.google/sre-book/addressing-cascading-failures/">Addressing Cascading Failures</a> e <a href="https://sre.google/sre-book/handling-overload/">Handling Overload</a></h4>
+        <p>Dois capítulos do livro de SRE do Google, livres na web. São a descrição mais concreta que existe de retry budget, load shedding e propagação de deadline em operação real, incluindo os números que eles usam. Não são artigo científico, mas são a fonte primária dos mecanismos que o TG vai medir.</p>
+        <div class="meta">O'Reilly / Google · 2016</div>
       </div>
     </div>
 
@@ -337,25 +595,27 @@ footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line); font
   </div>
 
   <h3>Livros de apoio</h3>
-  <p>Harchol-Balter, <em>Performance Modeling and Design of Computer Systems</em>, é a referência de teoria de filas aplicada a sistemas e aparece citada em quase todos esses papers. Raj Jain, <em>The Art of Computer Systems Performance Analysis</em>, é o clássico de desenho de experimento — importante porque metade dos trabalhos experimentais morre por medir errado. Nygard, <em>Release It!</em>, cobre o lado prático dos padrões de resiliência.</p>
+  <p>Harchol-Balter, <em>Performance Modeling and Design of Computer Systems</em>, é a referência de teoria de filas aplicada a sistemas e aparece citada em quase todos esses papers. Raj Jain, <em>The Art of Computer Systems Performance Analysis</em>, é o clássico de desenho de experimento — importante porque metade dos trabalhos experimentais morre por medir errado, e é dele que sai o método da etapa 03. Nygard, <em>Release It!</em>, cobre o lado prático dos padrões de resiliência.</p>
 
   <div class="callout">Nas buscas aparecem "papers" em periódicos como IJRAI e IJIRMPS. <strong>Não citar.</strong> São publicações de baixíssimo rigor, muitas predatórias. Ficar em ACM, USENIX, IEEE e nos preprints do arXiv que correspondam a artigos aceitos nesses veículos.</div>
 </section>
 
-<section>
+<section id="reuniao">
   <div class="rule"><span>Reunião</span><i></i></div>
   <h2>Perguntas para levar</h2>
+  <p>O rascunho já converge o escopo. O que falta decidir é o tamanho de cada etapa — e três dessas decisões mudam bastante o trabalho.</p>
   <ol class="q">
-    <li>Ela topa deslocar o foco de "mostrar que distribuir ajuda" para "caracterizar quando a mitigação vira o problema"?</li>
-    <li>Quanto ela espera de fundamentação analítica frente ao puramente empírico? Isso muda bastante o tamanho do trabalho.</li>
-    <li>Há preferência por HAProxy especificamente, ou Envoy e Traefik servem igualmente?</li>
-    <li>Existe algum sistema ou protocolo que ela já tinha curiosidade de ver analisado? Orientador com interesse próprio no objeto rende muito mais ao longo do ano.</li>
-    <li>Qual volume de implementação ela considera adequado — a camada empírica é um capítulo ou é metade do TG?</li>
+    <li>Demonstrar a falha metaestável é <strong>critério de sucesso ou objetivo esticado</strong>? Se for critério, o risco do TG sobe muito, porque depende de o fenômeno reproduzir na bancada. A proposta aqui é tratar como objetivo, com o resultado negativo fundamentado valendo como entrega.</li>
+    <li>O sistema de exemplo pode começar sendo um reprodutor do artigo do OSDI '22, ou ela prefere algo construído do zero? A primeira opção derruba o risco do primeiro semestre; a segunda dá mais autoria.</li>
+    <li>Quanto ela espera da camada analítica frente ao puramente empírico? Modelar filas e confrontar com a medição é o que dá tese ao trabalho, mas é meio capítulo a mais.</li>
+    <li>Duas voltas da espiral são suficientes como critério de parada, ou ela tem outro corte em mente?</li>
+    <li>A taxonomia do Avizienis serve, ou ela prefere alguma referência mais específica de sistemas distribuídos que já use em aula?</li>
+    <li>Havia preferência por HAProxy no rascunho original de escalabilidade. Ele continua no escopo, ou o balanceamento sai agora que o foco é o laço de realimentação?</li>
   </ol>
 </section>
 
 <footer>
-  Nota de escopo · preparada para a conversa com a Prof.ª Juliana<br>
+  Nota de escopo · rev. 2, após o rascunho da Prof.ª Juliana de 25 ago. 2026<br>
   Documento de trabalho, sujeito a revisão após a reunião.
 </footer>
 
