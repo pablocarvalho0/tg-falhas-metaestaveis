@@ -1,0 +1,47 @@
+# Publica a página no GitHub Pages a cada push na main, sem filtro de caminho:
+# o que está no ar é sempre o index.html mais recente da main, e o histórico de
+# execuções mostra exatamente qual commit gerou o que está publicado.
+#
+# Só o index.html vai para o ar. O resto do repositório — docs, serviços,
+# experimentos, resultados — fica versionado, mas não publicado.
+name: Publicar página
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Um deploy por vez; se dois pushes chegarem juntos, vale o último.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Montar o site
+        run: |
+          mkdir -p _site
+          cp index.html _site/index.html
+          # Sem Jekyll: a página é HTML único e não deve ser processada.
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

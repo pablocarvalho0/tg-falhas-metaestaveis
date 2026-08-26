@@ -2,6 +2,11 @@
 
 ### → [Ler a nota (com fluxogramas e simulador interativo)](https://pablocarvalho0.github.io/tg-falhas-metaestaveis/)
 
+[![Publicar página](https://github.com/pablocarvalho0/tg-falhas-metaestaveis/actions/workflows/pages.yml/badge.svg)](https://github.com/pablocarvalho0/tg-falhas-metaestaveis/actions/workflows/pages.yml)
+
+A página é republicada a cada push na `main` — o link acima serve sempre o
+`index.html` do último commit. O badge mostra se a última publicação passou.
+
 Nota de escopo para Trabalho de Graduação (ITA), a partir do rascunho da Prof.ª
 Juliana de Melo Bezerra de 25/08/2026. O trabalho é uma **esteira de ponta a ponta
 para medir como um serviço responde a estresse** — modelo de falha, modelo de carga,
