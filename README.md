@@ -1,5 +1,7 @@
 # Falhas metaestáveis — nota de escopo de TG
 
+### → [Ler a nota (com simulador interativo)](https://pablocarvalho0.github.io/tg-falhas-metaestaveis/)
+
 Nota de escopo para Trabalho de Graduação (ITA) sobre **falhas metaestáveis** em
 sistemas distribuídos: o caso em que o mecanismo criado para proteger o sistema
 (retry, cache, tratamento de erro) passa a ser o que o mantém indisponível depois
@@ -8,8 +10,6 @@ que o gatilho original já foi embora.
 A página inclui um simulador interativo — um servidor de capacidade fixa sob carga,
 com quatro políticas de retry — para ver o laço de realimentação fechar e, dependendo
 da política, o goodput não voltar mesmo depois do fim do pico.
-
-**Página publicada:** https://pablocarvalho0.github.io/tg-falhas-metaestaveis/
 
 ## Conteúdo
 
