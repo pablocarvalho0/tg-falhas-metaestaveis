@@ -1,23 +1,31 @@
-# Falhas metaestáveis — nota de escopo de TG
+# Engineering Resilient Distributed Systems — nota de escopo de TG
 
-### → [Ler a nota (com simulador interativo)](https://pablocarvalho0.github.io/tg-falhas-metaestaveis/)
+### → [Ler a nota (com fluxogramas e simulador interativo)](https://pablocarvalho0.github.io/tg-falhas-metaestaveis/)
 
-Nota de escopo para Trabalho de Graduação (ITA) sobre **falhas metaestáveis** em
-sistemas distribuídos: o caso em que o mecanismo criado para proteger o sistema
-(retry, cache, tratamento de erro) passa a ser o que o mantém indisponível depois
-que o gatilho original já foi embora.
+Nota de escopo para Trabalho de Graduação (ITA), a partir do rascunho da Prof.ª
+Juliana de Melo Bezerra de 25/08/2026. O trabalho é uma **esteira de ponta a ponta
+para medir como um serviço responde a estresse** — modelo de falha, modelo de carga,
+cenário, observação e mitigação — percorrida em espiral sobre um sistema de exemplo,
+com um alvo no fim: reproduzir em bancada uma **falha metaestável**, o caso em que o
+sistema não volta sozinho depois que o gatilho já foi embora.
 
-A página inclui um simulador interativo — um servidor de capacidade fixa sob carga,
-com quatro políticas de retry — para ver o laço de realimentação fechar e, dependendo
-da política, o goodput não voltar mesmo depois do fim do pico.
+A página traz dois fluxogramas (a esteira com o laço da espiral, e a topologia da
+bancada com os pontos de injeção de falha) e um simulador interativo — um servidor de
+capacidade fixa sob carga, com quatro políticas de retry — para ver o laço de
+realimentação fechar.
 
 ## Conteúdo
 
-- O problema em linguagem simples (sistema aberto vs. fechado, capacidade, goodput vs. throughput)
-- Os três estados: estável → vulnerável → metaestável
-- Amplificadores além do retry (cache frio, tratamento de erro lento, balanceamento)
-- Mitigações que atacam o laço: backoff + jitter, retry budget, circuit breaker, load shedding, propagação de deadline
-- Recorte proposto, calendário e bibliografia comentada (HotOS '21, OSDI '22, arXiv 2025)
+- **A esteira**: as cinco etapas do rascunho lidas como um método único, cada uma com
+  ferramenta, decisão a tomar e a armadilha correspondente
+- **O fenômeno**: simulador interativo e a teoria mínima (sistema aberto vs. fechado,
+  capacidade, goodput vs. throughput, os três estados, amplificadores e mitigações)
+- **A bancada**: sistema de exemplo com quatro containers e um proxy, gargalo
+  deliberado via pool fixo, e por que não construir do zero no primeiro semestre
+- **Escopo**: etapas necessárias e desejáveis separadas, camada analítica e calendário
+- **Leituras**: bibliografia comentada (HotOS '21, OSDI '22, NSDI '06, IEEE TDSC,
+  IEEE Software, arXiv 2025) e o alerta sobre periódicos predatórios
+- **Reunião**: as perguntas em aberto para fechar escopo
 
 ## Rodando localmente
 
