@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Falhas metaestáveis — nota de escopo de TG</title>
+<meta name="description" content="Nota de escopo de TG (ITA): falhas metaestáveis em sistemas distribuídos — quando o mecanismo de resiliência passa a ser a causa da indisponibilidade.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --paper:#ECEFEE; --card:#F8FAF9; --ink:#131A19; --muted:#5A6866;
+  --line:#D3DAD8; --teal:#0F6E56; --amber:#A96B0D; --coral:#B0402A;
+  --panel:#141C1B; --panel-line:#2C3937;
+  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --body:"Source Serif 4",Georgia,serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--body); font-size:18px; line-height:1.65;
+  font-optical-sizing:auto;
+}
+.wrap{max-width:730px; margin:0 auto; padding:0 22px 96px}
+a{color:var(--teal); text-decoration:none; border-bottom:1px solid rgba(15,110,86,.32)}
+a:hover{border-bottom-color:var(--teal)}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--teal); outline-offset:3px}
+
+header{padding:72px 0 40px}
+.eyebrow{font-family:var(--mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+h1{
+  font-family:var(--display); font-weight:800; font-size:clamp(38px,7.4vw,62px);
+  line-height:1.02; letter-spacing:-.025em; margin:16px 0 0; max-width:12ch;
+}
+.thesis{font-size:20px; line-height:1.55; color:var(--muted); margin:22px 0 0; max-width:52ch}
+.thesis em{color:var(--ink); font-style:italic}
+
+section{padding-top:56px}
+.rule{display:flex; align-items:center; gap:14px; margin-bottom:26px}
+.rule span{font-family:var(--mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); white-space:nowrap}
+.rule i{flex:1; height:1px; background:var(--line)}
+h2{font-family:var(--display); font-weight:600; font-size:29px; line-height:1.15; letter-spacing:-.015em; margin:0 0 18px}
+h3{font-family:var(--display); font-weight:600; font-size:19px; letter-spacing:-.005em; margin:34px 0 8px}
+p{margin:0 0 18px}
+strong{font-weight:600}
+
+.panel{background:var(--panel); border-radius:14px; padding:22px; color:#DCE5E3}
+.panel h3{color:#F1F5F4; margin:0 0 4px; font-size:17px}
+.panel .sub{font-family:var(--mono); font-size:11.5px; letter-spacing:.06em; color:#7E908D; margin:0 0 18px}
+canvas{width:100%; height:190px; display:block; border-radius:8px; background:#0D1413}
+.legend{display:flex; gap:18px; flex-wrap:wrap; font-family:var(--mono); font-size:11px; color:#8A9B98; margin-top:10px}
+.legend b{font-weight:400; color:#DCE5E3}
+.swatch{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; vertical-align:baseline}
+
+.controls{display:grid; grid-template-columns:1fr 1fr; gap:16px 20px; margin-top:20px}
+.ctl{display:flex; flex-direction:column; gap:7px}
+.ctl label{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#8A9B98}
+.ctl .val{color:#DCE5E3}
+select{
+  font-family:var(--mono); font-size:13px; padding:8px 10px; border-radius:7px;
+  background:#1E2827; color:#E4EBE9; border:1px solid var(--panel-line); width:100%;
+}
+input[type=range]{width:100%; accent-color:#4FB79A; margin:0}
+.btns{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap}
+button{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:.03em; padding:10px 15px;
+  border-radius:8px; border:1px solid var(--panel-line); background:#1E2827; color:#E4EBE9; cursor:pointer;
+}
+button:hover{background:#293534}
+button.primary{background:#4FB79A; color:#0D1413; border-color:#4FB79A; font-weight:500}
+button.primary:hover{background:#6BC8AE}
+
+.state{display:flex; align-items:center; gap:10px; margin-top:18px; font-family:var(--mono); font-size:12.5px}
+.dot{width:9px; height:9px; border-radius:50%; background:#4FB79A; flex:none}
+.state .label{color:#E4EBE9}
+.state .note{color:#7E908D}
+
+figure{margin:30px 0}
+figure svg{width:100%; height:auto; display:block}
+figcaption{font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:12px; line-height:1.6}
+
+.callout{border-left:2px solid var(--coral); padding:2px 0 2px 20px; margin:26px 0; color:var(--muted); font-style:italic}
+.callout strong{font-style:normal; color:var(--ink)}
+
+.stack{border-top:1px solid var(--line)}
+.item{border-bottom:1px solid var(--line); padding:20px 0; display:grid; grid-template-columns:78px 1fr; gap:20px}
+.item .tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding-top:5px}
+.item h4{font-family:var(--display); font-weight:600; font-size:17.5px; margin:0 0 5px; line-height:1.25}
+.item p{font-size:16px; margin:0; color:var(--muted); line-height:1.55}
+.item .meta{font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:7px}
+
+ol.q{padding-left:0; list-style:none; counter-reset:q; margin:0}
+ol.q li{counter-increment:q; padding-left:38px; position:relative; margin-bottom:16px}
+ol.q li::before{
+  content:counter(q,decimal-leading-zero); position:absolute; left:0; top:3px;
+  font-family:var(--mono); font-size:12px; color:var(--coral);
+}
+
+.cal{border-top:1px solid var(--line); margin-top:6px}
+.cal div{display:grid; grid-template-columns:118px 1fr; gap:18px; padding:13px 0; border-bottom:1px solid var(--line)}
+.cal b{font-family:var(--mono); font-size:12px; font-weight:400; color:var(--muted); letter-spacing:.04em; padding-top:2px}
+.cal span{font-size:16.5px}
+
+footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line); font-family:var(--mono); font-size:11.5px; color:var(--muted); line-height:1.8}
+
+@media (max-width:620px){
+  body{font-size:17px}
+  .controls{grid-template-columns:1fr}
+  .item{grid-template-columns:1fr; gap:6px}
+  .item .tag{padding-top:0}
+  .cal div{grid-template-columns:1fr; gap:2px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Nota de escopo · TG · ITA</div>
+  <h1>Quando a defesa vira o ataque</h1>
+  <p class="thesis">Um sistema distribuído pode cair por causa de um pico de tráfego e <em>continuar caído depois que o pico passa</em> — porque o mecanismo que existe para protegê-lo passou a alimentá-lo.</p>
+</header>
+
+<section>
+  <div class="rule"><span>Simulador</span><i></i></div>
+  <h2>Veja o laço fechar</h2>
+  <p>Um servidor com capacidade fixa recebendo pedidos. Quando um pedido espera demais, o cliente desiste e pede de novo — e esse pedido novo entra na mesma fila. Suba a carga base para perto da capacidade, injete um pico e observe o que acontece <em>depois</em> que o pico termina.</p>
+
+  <div class="panel">
+    <h3>Goodput sob carga</h3>
+    <p class="sub">trabalho útil entregue, % da capacidade</p>
+    <canvas id="chart" aria-label="Gráfico do goodput ao longo do tempo"></canvas>
+    <div class="legend">
+      <span><i class="swatch" style="background:#4FB79A"></i><b>goodput</b> — respostas dentro do prazo</span>
+      <span><i class="swatch" style="background:#C9772A"></i><b>trabalho desperdiçado</b> — feito tarde demais</span>
+    </div>
+
+    <div class="controls">
+      <div class="ctl">
+        <label for="load">Carga base · <span class="val" id="loadv">80% da capacidade</span></label>
+        <input type="range" id="load" min="30" max="99" value="80">
+      </div>
+      <div class="ctl">
+        <label for="policy">Política de retry</label>
+        <select id="policy">
+          <option value="immediate">Retry imediato</option>
+          <option value="backoff">Backoff exponencial + jitter</option>
+          <option value="budget">Retry budget (10%)</option>
+          <option value="none">Sem retry</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btns">
+      <button class="primary" id="spike">Injetar pico (3 s)</button>
+      <button id="pause">Pausar</button>
+      <button id="reset">Reiniciar</button>
+    </div>
+
+    <div class="state">
+      <span class="dot" id="dot"></span>
+      <span class="label" id="statelabel">Estável</span>
+      <span class="note" id="statenote">folga de capacidade confortável</span>
+    </div>
+  </div>
+
+  <p style="margin-top:22px">Com retry imediato e carga base alta, o pico termina e o goodput não volta. Troque para backoff ou retry budget e repita o experimento: o sistema afunda durante o pico, mas se recupera sozinho depois. <strong>Essa diferença é o objeto do trabalho.</strong></p>
+</section>
+
+<section>
+  <div class="rule"><span>O problema</span><i></i></div>
+  <h2>Em linguagem simples</h2>
+
+  <p>Comece por uma distinção que sustenta o resto. Num <strong>sistema fechado</strong>, o número de clientes é fixo: se o servidor fica lento, cada cliente espera, e o trabalho novo diminui naturalmente. Num <strong>sistema aberto</strong>, a carga vem de fora e não te consulta — se o servidor fica lento, os pedidos continuam chegando no mesmo ritmo. Toda a web é sistema aberto.</p>
+
+  <p>Junte com capacidade. Um serviço processa até μ pedidos por segundo e recebe λ. Enquanto λ é menor que μ, a fila fica estável. Quando λ ultrapassa μ, a fila cresce sem limite e a latência explode. Isso é teoria de filas básica, e é a única matemática necessária para entender o resto.</p>
+
+  <p>O terceiro ingrediente é a diferença entre <strong>throughput</strong> e <strong>goodput</strong>. Throughput é quanto trabalho o servidor faz. Goodput é quanto desse trabalho serve para alguém. Um servidor pode estar cem por cento ocupado produzindo respostas que ninguém mais espera, porque o cliente já deu timeout e pediu de novo. Trabalho feito, jogado fora.</p>
+
+  <p>E aí vem o mecanismo. O cliente não recebe resposta a tempo e faz <strong>retry</strong>. Retry é uma feature de confiabilidade — existe justamente para tolerar falha transitória. Mas cada retry é um pedido novo, então o retry aumenta λ. Serviço lento leva a mais retries, que levam a λ maior, que leva a serviço mais lento. É realimentação positiva, e se auto-sustenta.</p>
+
+  <div class="callout"><strong>O ponto central:</strong> quando o laço fecha, o sistema para de depender da causa original. O pico pode ter acabado há vinte minutos e o λ externo já ter voltado ao normal — o sistema continua no chão, porque agora a carga que o mantém lá é a que ele mesmo gera.</div>
+
+  <p>Ele está num estado localmente estável, do qual só sai com um empurrão externo. Daí o nome, emprestado da física. É exatamente por isso que reiniciar tudo funciona: você drena as filas e quebra o laço à força.</p>
+
+  <figure>
+    <svg viewBox="0 0 680 352" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="svgt svgd">
+      <title id="svgt">Os três estados de uma falha metaestável</title>
+      <desc id="svgd">Do estado estável ao vulnerável quando a carga cresce, e do vulnerável ao metaestável quando ocorre um gatilho. Uma seta tracejada indica que o sistema não retorna sozinho.</desc>
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+      <rect x="196" y="38" width="284" height="58" rx="9" fill="#E1F0EA" stroke="#0F6E56" stroke-width="0.6"/>
+      <text x="338" y="63" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="16" font-weight="600" fill="#0B4E3D">Estável</text>
+      <text x="338" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11.5" fill="#3F6C60">muita folga de capacidade</text>
+
+      <line x1="338" y1="98" x2="338" y2="142" stroke="#8A9895" stroke-width="1.2" marker-end="url(#ar)"/>
+      <text x="500" y="124" font-family="JetBrains Mono,monospace" font-size="11.5" fill="#5A6866">carga cresce</text>
+
+      <rect x="196" y="144" width="284" height="58" rx="9" fill="#F7ECD8" stroke="#A96B0D" stroke-width="0.6"/>
+      <text x="338" y="169" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="16" font-weight="600" fill="#7A4C06">Vulnerável</text>
+      <text x="338" y="188" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11.5" fill="#8A6524">eficiente, pouca folga</text>
+
+      <line x1="338" y1="204" x2="338" y2="248" stroke="#8A9895" stroke-width="1.2" marker-end="url(#ar)"/>
+      <text x="500" y="230" font-family="JetBrains Mono,monospace" font-size="11.5" fill="#5A6866">pico ou falha</text>
+
+      <rect x="196" y="250" width="284" height="58" rx="9" fill="#F7E3DC" stroke="#B0402A" stroke-width="0.6"/>
+      <text x="338" y="275" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="16" font-weight="600" fill="#7E2C1B">Metaestável</text>
+      <text x="338" y="294" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11.5" fill="#964632">retry alimenta retry</text>
+
+      <path d="M196 279 L88 279 L88 67 L192 67" fill="none" stroke="#9AA7A4" stroke-width="1" stroke-dasharray="5 5" marker-end="url(#ar)"/>
+      <text x="30" y="334" font-family="JetBrains Mono,monospace" font-size="11.5" fill="#5A6866">o gatilho vai embora, mas o sistema não volta sozinho</text>
+    </svg>
+    <figcaption>O estado do meio é o cruel: rodar com pouca folga é desejável, porque folga é hardware ocioso. Praticamente todo sistema bem operado passa a maior parte do tempo ali, de propósito. A vulnerabilidade é o preço da eficiência.</figcaption>
+  </figure>
+
+  <h3>Retry não é o único amplificador</h3>
+  <p>Cache é outro clássico: se um cache esvazia, todo o tráfego vai direto ao banco; o banco fica lento; como o banco está lento, o cache não consegue se repovoar; e o sistema fica preso com o cache frio indefinidamente. Tratamento de erro lento é outro — o caminho de exceção costuma ser mais caro que o caminho feliz, então mais erro gera mais lentidão, que gera mais erro. O próprio balanceador pode amplificar quando manda mais tráfego para o nó que respondeu rápido por acaso.</p>
+
+  <h3>As mitigações atacam o laço, não o gatilho</h3>
+  <p><strong>Backoff exponencial com jitter</strong> faz o cliente esperar cada vez mais entre tentativas, com aleatoriedade para não sincronizar todo mundo. <strong>Retry budget</strong> limita retries a uma fração do tráfego normal, tipicamente via token bucket, de modo que o retry nunca multiplique a carga além de um fator conhecido. <strong>Circuit breaker</strong> é uma máquina de estados no cliente que, após N falhas, para de tentar por um tempo e depois testa o terreno com poucos pedidos. <strong>Load shedding</strong> é o servidor recusar trabalho na entrada para proteger o que já aceitou. E <strong>propagação de deadline</strong> faz o pedido carregar consigo quanto tempo ainda resta, para ninguém gastar CPU num trabalho que já perdeu a validade.</p>
+</section>
+
+<section>
+  <div class="rule"><span>Proposta</span><i></i></div>
+  <h2>O recorte que estamos considerando</h2>
+
+  <p>O tema original da professora — projetar e avaliar estratégias de escalabilidade para aplicações distribuídas, cobrindo balanceamento de carga, orquestração e chaos engineering — tem um risco embutido na forma como está escrito. "Mostrar a necessidade de distribuição para garantir disponibilidade" já traz a conclusão dada: ninguém defende que distribuir não ajuda. Sem uma pergunta afiada, o trabalho vira um catálogo de gráficos de latência sem tese.</p>
+
+  <p>A proposta é manter o escopo e trocar a pergunta:</p>
+
+  <div class="callout" style="border-left-color:var(--teal)"><strong>Sob quais condições de carga e de configuração a própria estratégia de resiliência passa a ser a causa da indisponibilidade — e quais mitigações de fato quebram o laço de realimentação?</strong></div>
+
+  <p>Isso entrega as mesmas diretrizes de distribuição que ela pediu, mas com contribuição real, e conecta com uma linha de pesquisa viva na literatura de sistemas.</p>
+
+  <h3>Três camadas</h3>
+  <div class="stack">
+    <div class="item">
+      <div class="tag">Analítica</div>
+      <div>
+        <h4>Modelar antes de medir</h4>
+        <p>Teoria de filas para prever o ponto de saturação e o regime de colapso. A tese vira "o modelo prevê X, o sistema faz Y, e a diferença se explica por Z" — o que transforma um relatório de benchmark num trabalho com espinha dorsal.</p>
+      </div>
+    </div>
+    <div class="item">
+      <div class="tag">Empírica</div>
+      <div>
+        <h4>Reproduzir em ambiente controlado</h4>
+        <p>Uma aplicação pequena, com um gargalo deliberado, submetida a carga sintética e injeção de falha. Instrumento de laboratório, não produto.</p>
+      </div>
+    </div>
+    <div class="item">
+      <div class="tag">Prática</div>
+      <div>
+        <h4>Avaliar as mitigações e concluir</h4>
+        <p>Backoff, jitter, retry budget, circuit breaker e load shedding comparados sistematicamente sob os mesmos cenários, resultando em diretrizes justificadas em vez de folclore de engenharia.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Ferramental sem custo de rampa</h3>
+  <p>k6 ou Locust para gerar carga, Toxiproxy para injetar latência e falha de rede, Prometheus e Grafana para métricas, k3s ou kind se houver orquestração. Nada de nuvem paga: o fenômeno reproduz em três containers num laptop, e cloud gerenciada só troca tempo de pesquisa por tempo de configuração de IAM.</p>
+
+  <h3>Calendário</h3>
+  <div class="cal">
+    <div><b>Jan – Mar</b><span>Construir e instrumentar. Congelar a aplicação em março e não mexer mais.</span></div>
+    <div><b>Abr</b><span>Escrever o capítulo de metodologia. Não deixar para setembro.</span></div>
+    <div><b>Abr – Ago</b><span>Rodar experimentos.</span></div>
+    <div><b>Set – Nov</b><span>Escrever.</span></div>
+  </div>
+  <p style="margin-top:20px">Toda vez que bater vontade de melhorar a aplicação, é sinal de fuga do experimento. O que mata TG de quem trabalha não é a bancada — é a escrita empurrada para o fim.</p>
+</section>
+
+<section>
+  <div class="rule"><span>Leituras</span><i></i></div>
+  <h2>Por onde começar</h2>
+
+  <div class="stack">
+    <div class="item">
+      <div class="tag">Começar aqui</div>
+      <div>
+        <h4><a href="https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s11-bronson.pdf">Metastable Failures in Distributed Systems</a></h4>
+        <p>Bronson, Aghayev, Charapko e Zhu. Onde o termo nasce, a partir de anos operando sistemas em escala. Sete páginas, vale ler inteiro. Fecha dizendo que construir sistemas robustos a falhas metaestáveis desconhecidas segue um problema em aberto.</p>
+        <div class="meta">HotOS 2021 · ACM</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag">Evidência</div>
+      <div>
+        <h4><a href="https://www.usenix.org/system/files/osdi22-huang-lexiang.pdf">Metastable Failures in the Wild</a></h4>
+        <p>Huang et al. Estudo de 22 falhas em 11 organizações a partir de relatórios públicos de incidente; ao menos 4 dos 15 maiores outages da AWS na década se encaixam no padrão. Traz também aplicações que reproduzem cada tipo em ambiente controlado.</p>
+        <div class="meta">OSDI 2022 · USENIX · <a href="https://github.com/lexiangh/Metastability">código aberto no GitHub</a></div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag">Leve</div>
+      <div>
+        <h4><a href="https://brooker.co.za/blog/2021/05/24/metastable.html">Metastability and Distributed Systems</a></h4>
+        <p>Marc Brooker, engenheiro principal da AWS. A leitura mais acessível das três, boa para fixar a intuição antes de encarar os papers.</p>
+        <div class="meta">Blog · 2021</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag">Matemática</div>
+      <div>
+        <h4><a href="https://arxiv.org/abs/2510.03551">Formal Analysis of Metastable Failures in Software Systems</a></h4>
+        <p>Teoria de filas e cadeias de Markov em tempo contínuo aplicadas ao fenômeno, com cálculo de tempos de recuperação. Traz uma observação que pode sustentar um TG inteiro: modelos de fila padrão como o M/M/c simplesmente não exibem metaestabilidade — descobrir o que falta neles é pergunta de pesquisa.</p>
+        <div class="meta">arXiv · out. 2025</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag">Método</div>
+      <div>
+        <h4><a href="https://onlinelibrary.wiley.com/doi/10.1002/spe.3368">A declarative approach and benchmark tool for controlled evaluation of microservice resiliency patterns</a></h4>
+        <p>Aderaldo et al. Desenho experimental reutilizável: cenários especificados declarativamente para medir o impacto de desempenho de retry e circuit breaker sob carga e falha variadas.</p>
+        <div class="meta">Software: Practice and Experience · 2025</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="tag">Panorama</div>
+      <div>
+        <h4><a href="https://arxiv.org/abs/2512.16959">Resilient Microservices: A Systematic Review of Recovery Patterns</a></h4>
+        <p>Revisão sistemática de circuit breakers, retries, sagas, idempotência, bulkheads, backpressure e chaos testing entre 2014 e 2025. A conclusão — evidência fragmentada, resultados conflitantes, engenheiros sem base consolidada para escolher a tática certa — é o parágrafo de justificativa pronto.</p>
+        <div class="meta">arXiv · 2025</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Livros de apoio</h3>
+  <p>Harchol-Balter, <em>Performance Modeling and Design of Computer Systems</em>, é a referência de teoria de filas aplicada a sistemas e aparece citada em quase todos esses papers. Raj Jain, <em>The Art of Computer Systems Performance Analysis</em>, é o clássico de desenho de experimento — importante porque metade dos trabalhos experimentais morre por medir errado. Nygard, <em>Release It!</em>, cobre o lado prático dos padrões de resiliência.</p>
+
+  <div class="callout">Nas buscas aparecem "papers" em periódicos como IJRAI e IJIRMPS. <strong>Não citar.</strong> São publicações de baixíssimo rigor, muitas predatórias. Ficar em ACM, USENIX, IEEE e nos preprints do arXiv que correspondam a artigos aceitos nesses veículos.</div>
+</section>
+
+<section>
+  <div class="rule"><span>Reunião</span><i></i></div>
+  <h2>Perguntas para levar</h2>
+  <ol class="q">
+    <li>Ela topa deslocar o foco de "mostrar que distribuir ajuda" para "caracterizar quando a mitigação vira o problema"?</li>
+    <li>Quanto ela espera de fundamentação analítica frente ao puramente empírico? Isso muda bastante o tamanho do trabalho.</li>
+    <li>Há preferência por HAProxy especificamente, ou Envoy e Traefik servem igualmente?</li>
+    <li>Existe algum sistema ou protocolo que ela já tinha curiosidade de ver analisado? Orientador com interesse próprio no objeto rende muito mais ao longo do ano.</li>
+    <li>Qual volume de implementação ela considera adequado — a camada empírica é um capítulo ou é metade do TG?</li>
+  </ol>
+</section>
+
+<footer>
+  Nota de escopo · preparada para a conversa com a Prof.ª Juliana<br>
+  Documento de trabalho, sujeito a revisão após a reunião.
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var cv=document.getElementById('chart'), ctx=cv.getContext('2d');
+  var loadEl=document.getElementById('load'), loadv=document.getElementById('loadv');
+  var polEl=document.getElementById('policy');
+  var dot=document.getElementById('dot'), slab=document.getElementById('statelabel'), snote=document.getElementById('statenote');
+  var pauseBtn=document.getElementById('pause');
+
+  var CAP=100, TIMEOUT=6, HIST=200;
+  var queue=[], pending=[], hist=[], spikeMarks=[];
+  var tokens=0, running=true, spikeLeft=0, t=0;
+
+  function reset(){
+    queue=[]; pending=[]; hist=[]; spikeMarks=[]; tokens=CAP*0.1; spikeLeft=0; t=0;
+  }
+  reset();
+
+  function policy(){ return polEl.value; }
+
+  function step(){
+    t++;
+    var base=CAP*(+loadEl.value)/100;
+    var lambda=base*(spikeLeft>0?3:1);
+    if(spikeLeft>0) spikeLeft--;
+
+    var n=Math.round(lambda+(Math.random()-0.5)*4);
+    for(var i=0;i<n;i++) queue.push({age:0,att:0});
+
+    for(var j=pending.length-1;j>=0;j--){
+      pending[j].d--;
+      if(pending[j].d<=0){ queue.push({age:0,att:pending[j].att}); pending.splice(j,1); }
+    }
+
+    var p=policy();
+    if(p==='budget') tokens=Math.min(base*0.5, tokens+base*0.1);
+
+    var served=0, wasted=0;
+    var cap=CAP;
+    while(cap>0 && queue.length>0){
+      var r=queue.shift();
+      if(r.age>TIMEOUT) wasted++; else served++;
+      cap--;
+    }
+
+    var dropped=[];
+    for(var k=queue.length-1;k>=0;k--){
+      queue[k].age++;
+      if(queue[k].age>TIMEOUT*2){ dropped.push(queue[k]); queue.splice(k,1); }
+    }
+
+    for(var m=0;m<dropped.length;m++){
+      var d=dropped[m];
+      if(p==='none') continue;
+      if(d.att>=3 && p!=='immediate') continue;
+      if(p==='budget'){ if(tokens<1) continue; tokens--; }
+      if(p==='immediate') queue.push({age:0,att:d.att+1});
+      else pending.push({d:Math.round(Math.pow(2,d.att)*2+Math.random()*4), att:d.att+1});
+    }
+
+    hist.push({g:served/CAP, w:wasted/CAP});
+    if(hist.length>HIST){ hist.shift(); for(var s=0;s<spikeMarks.length;s++) spikeMarks[s]--; }
+    spikeMarks=spikeMarks.filter(function(x){return x>=0;});
+
+    updateState(served/CAP, base/CAP);
+  }
+
+  function updateState(g, u){
+    var lbl,note,col;
+    if(g<0.45){ lbl='Metaestável'; note='preso no laço de realimentação'; col='#D96A4A'; }
+    else if(u>=0.7){ lbl='Vulnerável'; note='eficiente, mas com pouca folga'; col='#D9A22A'; }
+    else { lbl='Estável'; note='folga de capacidade confortável'; col='#4FB79A'; }
+    if(slab.textContent!==lbl){ slab.textContent=lbl; snote.textContent=note; dot.style.background=col; }
+  }
+
+  function resize(){
+    var r=cv.getBoundingClientRect(), d=window.devicePixelRatio||1;
+    cv.width=r.width*d; cv.height=r.height*d; ctx.setTransform(d,0,0,d,0,0);
+  }
+
+  function draw(){
+    var w=cv.getBoundingClientRect().width, h=cv.getBoundingClientRect().height;
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle='#1E2827'; ctx.lineWidth=1;
+    for(var y=0.25;y<1;y+=0.25){
+      ctx.beginPath(); ctx.moveTo(0,h-y*h); ctx.lineTo(w,h-y*h); ctx.stroke();
+    }
+    ctx.fillStyle='#3E4E4C'; ctx.font='10px JetBrains Mono, monospace';
+    ctx.fillText('100%',6,13);
+
+    for(var s=0;s<spikeMarks.length;s++){
+      var mx=(spikeMarks[s]/HIST)*w;
+      ctx.strokeStyle='rgba(217,106,74,.35)'; ctx.beginPath();
+      ctx.moveTo(mx,0); ctx.lineTo(mx,h); ctx.stroke();
+    }
+
+    function line(key,color,width){
+      ctx.strokeStyle=color; ctx.lineWidth=width; ctx.lineJoin='round'; ctx.beginPath();
+      for(var i=0;i<hist.length;i++){
+        var x=(i/HIST)*w, y=h-Math.min(1,hist[i][key])*h*0.92-4;
+        i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+      }
+      ctx.stroke();
+    }
+    line('w','#C9772A',1.2);
+    line('g','#4FB79A',2);
+  }
+
+  var acc=0, last=performance.now();
+  function loop(now){
+    var dt=now-last; last=now;
+    if(running){
+      acc+=dt;
+      while(acc>60){ step(); acc-=60; }
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  loadEl.addEventListener('input',function(){ loadv.textContent=loadEl.value+'% da capacidade'; });
+  polEl.addEventListener('change',function(){ tokens=CAP*0.1; });
+  document.getElementById('spike').addEventListener('click',function(){
+    spikeLeft=50; spikeMarks.push(hist.length);
+  });
+  document.getElementById('reset').addEventListener('click',reset);
+  pauseBtn.addEventListener('click',function(){
+    running=!running; pauseBtn.textContent=running?'Pausar':'Retomar';
+  });
+
+  window.addEventListener('resize',resize);
+  resize();
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    running=false; pauseBtn.textContent='Retomar';
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
