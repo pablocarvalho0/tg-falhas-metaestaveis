@@ -18,6 +18,7 @@ Orientação: Prof.ª Juliana de Melo Bezerra
 | Apresentação | [`exame_2/apresentacao.pdf`](exame_2/apresentacao.pdf) · [`.html`](exame_2/apresentacao.html) (baixe e abra no navegador) |
 | Código | [`exame_2/`](exame_2/) |
 | Metodologia detalhada e resultados completos | [`exame_2/methodology.md`](exame_2/methodology.md) · [`exame_2/results.md`](exame_2/results.md) |
+| Reprodutibilidade em duas máquinas | [`exame_2/reprodutibilidade.md`](exame_2/reprodutibilidade.md) |
 | Análise matemática e simulação | [`exame_2/modelo/`](exame_2/modelo/) |
 
 ---
@@ -246,6 +247,22 @@ células da bancada. Varrendo a carga com 10 sementes:
 A transição é **probabilística**, como prevê a definição de metaestabilidade.
 
 ![Fronteira simulada](relatorio/figuras/fronteira.svg)
+
+### Reprodutibilidade em duas máquinas
+
+Rodamos a mesma campanha numa segunda máquina, bem diferente da primeira:
+
+| | Máquina A | Máquina B |
+|---|---|---|
+| Ambiente | laptop arm64, VM com 2 vCPU e 2 GB | VM em nuvem x86_64, 4 vCPU e 15 GB |
+| Capacidade μ | 190,45 req/s | 197,04 req/s |
+| Tempo de serviço Ŝ | 42,03 ms | 40,59 ms |
+
+O código, os parâmetros e as sementes são os mesmos. As políticas se ajustam à calibração de
+cada máquina. Nas primeiras execuções, os desfechos coincidem. A primeira divergência apareceu
+numa célula de fronteira: com o limite fixo a 50 % de carga, os impacientes ficaram com 10 %
+sem resposta na máquina A e 0 % na máquina B. A comparação completa, com o que muda e o que se
+mantém, está em [`exame_2/reprodutibilidade.md`](exame_2/reprodutibilidade.md) (em andamento).
 
 ### Como instalar e executar
 
