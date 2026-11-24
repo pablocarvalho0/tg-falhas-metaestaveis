@@ -353,6 +353,8 @@ Cada pasta corresponde a uma peça da explicação: **cliente** manda pedidos co
 
 ```
 README.md                    ← você está aqui: o trabalho inteiro em uma página
+CONTRIBUTING.md              como o código está organizado e como mexer nele
+LICENSE                      licença MIT
 experimento/                 a bancada e o experimento das 4 políticas de fila
   cliente/                   gerador de carga (k6): chegadas abertas, timeout, retry fixo ou backoff
   servidor/                  serviço sob teste (Go): 8 workers, fila de 64, as 4 políticas de fila
@@ -368,7 +370,6 @@ experimento/                 a bancada e o experimento das 4 políticas de fila
   docker-compose.yml         sobe a bancada inteira
   bancada.sh                 um comando por etapa (testes, calibrar, cenario, varredura, analise)
   experimentos.sh            a campanha completa (96 execuções)
-  CONTRIBUTING.md            como o código está organizado e como mexer nele
 apresentacao/                slides da apresentação final (html e pdf)
 relatorio/                   relatório do exame (md, html, pdf) e figuras
 docs/                        fundamentação e decisões (0001: escopo do semestre; 0002: mudança de foco)
