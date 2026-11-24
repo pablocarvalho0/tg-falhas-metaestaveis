@@ -1,0 +1,99 @@
+# Experimento 2 — políticas de fila contra o laço de retry (ver PLAN.md).
+#
+#   k6 (carga aberta, duas classes de cliente, retry no cliente)
+#     └─► servico (Go: C workers, fila Q, política de fila) ─► toxiproxy ─► postgres
+#   prometheus coleta o serviço a cada 1 s e recebe as métricas do k6
+#   bancada (orquestrador Go) troca a política, liga o atraso, roda o k6 e exporta CSV
+#
+# Uso: ./bancada.sh tudo
+name: exame2-csc27
+
+services:
+  postgres:
+    build: ./infra/postgres
+    environment:
+      POSTGRES_USER: bancada
+      POSTGRES_PASSWORD: bancada
+      POSTGRES_DB: bancada
+    healthcheck:
+      # -h 127.0.0.1: só fica saudável depois que o init.sql terminou e o
+      # servidor definitivo está aceitando TCP.
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "bancada", "-d", "bancada"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  toxiproxy:
+    build: ./infra/toxiproxy
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/toxiproxy-cli", "list"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  # Serviço sob teste: chega ao banco pelo proxy, por onde a falta entra. A
+  # política de fila pode ser trocada no ar (POST /admin/policy); as variáveis
+  # abaixo são só os valores iniciais.
+  servico:
+    build: ./servico
+    environment:
+      WORKERS: ${WORKERS:-8}            # C
+      QUEUE: ${QUEUE:-64}               # Q, o mesmo para todas as políticas
+      SERVICE_MS: ${SERVICE_MS:-40}     # T
+      QUEUE_POLICY: ${QUEUE_POLICY:-fifo}
+      MAX_WAIT_MS: ${MAX_WAIT_MS:-100}  # W (timebound e lifo)
+      S_HAT_MS: ${S_HAT_MS:-42}         # Ŝ (deadline)
+      MARGIN_MS: ${MARGIN_MS:-10}
+      OVERLOAD_MS: ${OVERLOAD_MS:-100}  # janela do detector de sobrecarga (lifo)
+      OVERLOAD_DETECTOR: ${OVERLOAD_DETECTOR:-empty}
+      CODEL_TARGET_MS: ${CODEL_TARGET_MS:-5}
+      DB_URL: postgres://bancada:bancada@toxiproxy:5433/bancada
+    depends_on:
+      toxiproxy:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    ulimits:
+      nofile: 65536
+
+  prometheus:
+    build: ./infra/prometheus
+    depends_on:
+      servico:
+        condition: service_healthy
+
+  # Orquestrador + k6. Não sobe com `up`: é executado por `run` (bancada.sh).
+  bancada:
+    build:
+      context: .
+      dockerfile: orquestrador/Dockerfile
+    profiles: ["execucao"]
+    depends_on:
+      servico:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
+    environment:
+      OVERLOAD_DETECTOR: ${OVERLOAD_DETECTOR:-empty}
+    volumes:
+      - ./resultados:/resultados
+    ulimits:
+      nofile: 65536
+    sysctls:
+      # Cada timeout fecha uma conexão; com centenas por segundo, a faixa
+      # padrão de portas efêmeras pode esgotar em TIME_WAIT.
+      net.ipv4.ip_local_port_range: "1024 65535"
+      net.ipv4.tcp_tw_reuse: "1"
+
+  # Gráficos e tabelas a partir dos CSV.
+  analise:
+    build: ./analise
+    profiles: ["analise"]
+    volumes:
+      - ./resultados:/resultados

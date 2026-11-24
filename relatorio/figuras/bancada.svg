@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" font-family="sans-serif" font-size="15">
+<rect width="900" height="330" fill="#fcfcfb"/>
+<defs><marker id="s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#52514e"/></marker></defs>
+<g stroke="#52514e" stroke-width="1.5" fill="#f3f2ee">
+<rect x="20" y="40" width="170" height="80" rx="10"/>
+<rect x="250" y="40" width="190" height="80" rx="10" fill="#0b0b0b"/>
+<rect x="500" y="40" width="170" height="80" rx="10" stroke="#eb6834" stroke-width="2.5"/>
+<rect x="730" y="40" width="150" height="80" rx="10"/>
+<rect x="150" y="210" width="190" height="80" rx="10" fill="#e3f3ec"/>
+<rect x="500" y="210" width="190" height="80" rx="10" stroke-dasharray="6 4"/>
+</g>
+<g stroke="#52514e" stroke-width="1.5" fill="none" marker-end="url(#s)">
+<path d="M190 80H248"/><path d="M440 80H498"/><path d="M670 80H728"/>
+<path d="M105 120V250H148"/><path d="M345 120V250H342"/>
+<path d="M595 210V122" stroke-dasharray="6 4"/>
+<path d="M520 290V308H8V80H18" stroke-dasharray="6 4"/>
+</g>
+<g text-anchor="middle">
+<text x="105" y="72" font-weight="700">Carga · k6</text><text x="105" y="94" fill="#52514e" font-size="13">carga aberta, 2 classes</text><text x="105" y="111" fill="#52514e" font-size="13">timeout + retry</text>
+<text x="345" y="72" font-weight="700" fill="#fff">Serviço · Go</text><text x="345" y="94" fill="#ccc" font-size="13">8 workers, fila 64</text><text x="345" y="111" fill="#ccc" font-size="13">4 políticas de fila</text>
+<text x="585" y="72" font-weight="700">Toxiproxy</text><text x="585" y="94" fill="#c0501f" font-size="13">+200 ms por 20 s</text>
+<text x="805" y="72" font-weight="700">Postgres 17</text><text x="805" y="94" fill="#52514e" font-size="13">consulta ~40 ms</text>
+<text x="245" y="242" font-weight="700">Prometheus</text><text x="245" y="264" fill="#52514e" font-size="13">séries a cada 1 s</text>
+<text x="595" y="242" font-weight="700">Orquestrador · Go</text><text x="595" y="262" fill="#52514e" font-size="13">política, k6, falha,</text><text x="595" y="279" fill="#52514e" font-size="13">CSV + manifesto</text>
+<text x="770" y="260" fill="#52514e" font-size="13" text-anchor="start">Análise · Python</text><text x="770" y="278" fill="#52514e" font-size="13" text-anchor="start">tabelas e figuras</text>
+</g>
+</svg>

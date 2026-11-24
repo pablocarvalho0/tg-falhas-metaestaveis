@@ -1,5 +1,9 @@
 # Engineering Resilient Distributed Systems — nota de escopo de TG
 
+> **Lab Exame CSC-27 (dez/2026):** experimento em [`exame_2/`](exame_2/), relatório em
+> [`relatorio/`](relatorio/), apresentação em [`exame_2/apresentacao.html`](exame_2/apresentacao.html),
+> o que falta em [`PROXIMOS_PASSOS.md`](PROXIMOS_PASSOS.md).
+
 ### → [Ler a nota (com fluxogramas e simulador interativo)](https://pablocarvalho0.github.io/tg-falhas-metaestaveis/)
 
 [![Publicar página](https://github.com/pablocarvalho0/tg-falhas-metaestaveis/actions/workflows/pages.yml/badge.svg)](https://github.com/pablocarvalho0/tg-falhas-metaestaveis/actions/workflows/pages.yml)

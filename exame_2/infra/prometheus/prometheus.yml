@@ -1,0 +1,10 @@
+# Resolução de medição de 1 s (requisito não funcional da bancada).
+global:
+  scrape_interval: 1s
+  scrape_timeout: 900ms
+
+scrape_configs:
+  # Serviço sob teste: fala com o Postgres através do Toxiproxy.
+  - job_name: servico
+    static_configs:
+      - targets: ["servico:8080"]

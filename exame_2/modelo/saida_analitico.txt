@@ -1,0 +1,13 @@
+== Contas fechadas (mesmos parâmetros da bancada)
+capacidade normal        μ  = C/Ŝ = 8/42 ms = 190.5 req/s (medido: 190,45)
+capacidade na falha      μf = C/(Ŝ+200 ms) = 33.1 req/s (methodology: ~33)
+espera com a fila cheia  Q/μ = 64/190 = 336 ms  > timeouts 100 e 200 ms
+  -> com a fila cheia, TODO pedido na fila FIFO estoura o timeout antes de ser atendido.
+amplificação no estado preso = N+1 = 4 tentativas por pedido novo
+fronteira do laço (fila fixa): (N+1)·λ ≥ μ  =>  λ* = μ/(N+1) = 47.6 req/s = 25 % de μ
+  -> abaixo de 25 % o sistema preso drena sozinho; acima, os retries sozinhos já saturam o servidor.
+limite fixo W = timeout médio − Ŝ − margem = 150 − 42 − 10 = 98 ms
+  classe impatient: timeout 100 ms, espera útil 48 ms -> W deixa esperar demais (trabalho desperdiçado)
+  classe patient  : timeout 200 ms, espera útil 148 ms -> W descarta cedo demais
+prazo por pedido: descarta se agora + Ŝ + margem > prazo  -> nunca começa trabalho inútil (salvo ruído > margem)
+custo de um descarte na saída da fila ≈ 0 -> o worker livre limpa todo o prefixo vencido de uma vez

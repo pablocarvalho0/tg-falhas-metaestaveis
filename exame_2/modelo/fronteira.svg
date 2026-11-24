@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" font-family="sans-serif" font-size="13">
+<rect width="760" height="420" fill="#fcfcfb"/>
+<line x1="60" x2="700" y1="360.0" y2="360.0" stroke="#e1e0d9"/>
+<text x="52" y="364.0" text-anchor="end" fill="#52514e">0%</text>
+<line x1="60" x2="700" y1="288.6" y2="288.6" stroke="#e1e0d9"/>
+<text x="52" y="292.6" text-anchor="end" fill="#52514e">25%</text>
+<line x1="60" x2="700" y1="217.1" y2="217.1" stroke="#e1e0d9"/>
+<text x="52" y="221.1" text-anchor="end" fill="#52514e">50%</text>
+<line x1="60" x2="700" y1="145.7" y2="145.7" stroke="#e1e0d9"/>
+<text x="52" y="149.7" text-anchor="end" fill="#52514e">75%</text>
+<line x1="60" x2="700" y1="74.3" y2="74.3" stroke="#e1e0d9"/>
+<text x="52" y="78.3" text-anchor="end" fill="#52514e">100%</text>
+<text x="60.0" y="380" text-anchor="middle" fill="#52514e">0%</text>
+<text x="124.0" y="380" text-anchor="middle" fill="#52514e">10%</text>
+<text x="188.0" y="380" text-anchor="middle" fill="#52514e">20%</text>
+<text x="252.0" y="380" text-anchor="middle" fill="#52514e">30%</text>
+<text x="316.0" y="380" text-anchor="middle" fill="#52514e">40%</text>
+<text x="380.0" y="380" text-anchor="middle" fill="#52514e">50%</text>
+<text x="444.0" y="380" text-anchor="middle" fill="#52514e">60%</text>
+<text x="508.0" y="380" text-anchor="middle" fill="#52514e">70%</text>
+<text x="572.0" y="380" text-anchor="middle" fill="#52514e">80%</text>
+<text x="636.0" y="380" text-anchor="middle" fill="#52514e">90%</text>
+<text x="700.0" y="380" text-anchor="middle" fill="#52514e">100%</text>
+<line x1="220.0" x2="220.0" y1="50" y2="360" stroke="#0b0b0b" stroke-dasharray="5 4"/>
+<text x="226.0" y="46" fill="#0b0b0b">μ/(N+1) = 25 %</text>
+<polyline points="92.0,74.3 124.0,74.3 156.0,74.3 188.0,74.3 220.0,74.3 252.0,74.3 284.0,292.4 316.0,360.0 348.0,360.0 380.0,360.0 412.0,360.0 444.0,360.0 476.0,360.0 508.0,360.0 540.0,360.0 572.0,360.0 604.0,360.0 636.0,360.0 668.0,360.0" fill="none" stroke="#d03b3b" stroke-width="2.5"/>
+<text x="470" y="154.3" fill="#d03b3b">— fila fixa, espera fixa</text>
+<polyline points="92.0,74.3 124.0,74.3 156.0,74.3 188.0,74.3 220.0,74.3 252.0,74.3 284.0,360.0 316.0,360.0 348.0,360.0 380.0,360.0 412.0,360.0 444.0,360.0 476.0,360.0 508.0,360.0 540.0,360.0 572.0,360.0 604.0,360.0 636.0,360.0 668.0,360.0" fill="none" stroke="#eb6834" stroke-width="2.5"/>
+<text x="470" y="172.3" fill="#eb6834">— fila fixa, backoff+jitter</text>
+<polyline points="92.0,74.3 124.0,74.3 156.0,74.3 188.0,74.3 220.0,74.3 252.0,74.3 284.0,74.3 316.0,74.3 348.0,74.3 380.0,74.3 412.0,74.3 444.0,74.3 476.0,74.3 508.0,74.3 540.0,74.3 572.0,74.3 604.0,74.3 636.0,74.8 668.0,75.2" fill="none" stroke="#2a78d6" stroke-width="2.5"/>
+<text x="470" y="190.3" fill="#2a78d6">— prazo por pedido, espera fixa</text>
+<polyline points="92.0,74.3 124.0,74.3 156.0,74.3 188.0,74.3 220.0,74.3 252.0,74.3 284.0,74.3 316.0,74.3 348.0,74.3 380.0,74.3 412.0,74.3 444.0,74.3 476.0,74.3 508.0,74.3 540.0,74.3 572.0,74.3 604.0,74.3 636.0,74.6 668.0,75.0" fill="none" stroke="#1baf7a" stroke-width="2.5"/>
+<text x="470" y="208.3" fill="#1baf7a">— prazo por pedido, backoff+jitter</text>
+<text x="380.0" y="406" text-anchor="middle" fill="#0b0b0b">carga (% de μ)</text>
+<text x="16" y="210.0" transform="rotate(-90 16 210.0)" text-anchor="middle" fill="#0b0b0b">respondidos no prazo, últimos 30 s</text>
+</svg>

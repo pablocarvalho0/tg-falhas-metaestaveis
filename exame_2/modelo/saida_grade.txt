@@ -1,0 +1,9 @@
+fila       cliente                          20%                         50%                         70%                         90%
+fifo       fixed               recuperou 100.0%                PRESO   0.0%                PRESO   0.0%   caiu antes da falh   0.0%
+fifo       backoff             recuperou 100.0%                PRESO   0.0%                PRESO   0.0%   caiu antes da falh   0.0%
+timebound  fixed               recuperou 100.0%            recuperou 100.0%                PRESO  44.3%   caiu antes da falh  37.2%
+timebound  backoff             recuperou 100.0%            recuperou 100.0%                PRESO  46.0%   caiu antes da falh  41.3%
+deadline   fixed               recuperou 100.0%            recuperou 100.0%            recuperou 100.0%            recuperou  99.8%
+deadline   backoff             recuperou 100.0%            recuperou 100.0%            recuperou 100.0%            recuperou  99.9%
+lifo       fixed               recuperou 100.0%            recuperou 100.0%            recuperou 100.0%            recuperou  99.8%
+lifo       backoff             recuperou 100.0%            recuperou 100.0%            recuperou 100.0%            recuperou  99.9%
