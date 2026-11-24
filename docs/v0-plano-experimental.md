@@ -208,7 +208,7 @@ Lista tão importante quanto a de escopo, porque é onde o tempo vaza:
 
 ## 9. Estrutura do repositório
 
-> **Nota (nov/2026).** Esta era a estrutura planejada para o V0. Ela não chegou a ser implementada: o semestre passou a ser o Lab Exame de CSC-27 (ver [decisão 0001](decisoes/0001-escopo-exame-csc27.md)), e o código está em [`exame_2/`](../exame_2/). As pastas vazias do esqueleto foram removidas do repositório.
+> **Nota (nov/2026).** Esta era a estrutura planejada para o V0. Ela não chegou a ser implementada: o semestre passou a ser o Lab Exame de CSC-27 (ver [decisão 0001](decisoes/0001-escopo-exame-csc27.md)), e o código está em [`experimento/`](../experimento/). As pastas vazias do esqueleto foram removidas do repositório.
 
 ```
 tg-resilient-distributed-systems/

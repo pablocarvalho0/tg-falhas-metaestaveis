@@ -27,7 +27,7 @@ O experimento 2 move o foco para o **servidor**: qual política de fila quebra o
 | Repetições | 3 → 96 execuções |
 
 Duas classes de cliente (timeouts de 100 e 200 ms) para que "limite fixo" e "prazo por pedido"
-não sejam idênticos por construção. Detalhes: `exame_2/PLAN.md` e `exame_2/methodology.md`.
+não sejam idênticos por construção. Detalhes: `experimento/plano.md` e `experimento/metodologia.md`.
 
 ## Consequências
 

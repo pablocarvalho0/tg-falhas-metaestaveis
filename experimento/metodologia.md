@@ -2,7 +2,7 @@
 
 **Server queue policies against the retry loop** · Lab Exame CSC-27 / CE-288 · ITA · November 2026
 
-Companion documents: [PLAN.md](PLAN.md) (the design as planned) · [results.md](results.md) (the results). Experiment 1, which this one follows up, is the first LabExame bench and report (delivered separately).
+Companion documents: [plano.md](plano.md) (the design as planned) · [resultados.md](resultados.md) (the results). Experiment 1, which this one follows up, is the first LabExame bench and report (delivered separately).
 
 ## 1. Background and question
 
@@ -207,13 +207,13 @@ Other checks reported for each run: zero iterations dropped by k6 (so the load s
 2. **Pilot** (battery, morning of 21 Nov): each policy at 70 % with the fixed-delay client. Policy 1 got stuck and 2–4 recovered. The LIFO detector was on for 100 % of the fault and off in steady state and recovery, so the CoDel fallback was not needed. Because the pilot ran on battery, the calibration was redone on AC power, and Ŝ and W were derived from calibration instead of being hard-coded.
 3. **Calibration** on AC power (section 7).
 4. **Repetition 1** (32 runs, 12:25–13:57 UTC). It was interrupted once when the session ended, and resumed by reusing the runs already saved. One run was discarded by the freeze guard (76 ms) and repeated.
-5. **Repetitions 2 and 3** (64 runs, started 13:57 UTC). They reuse repetition 1, so `resultados/principal/` holds all 96 runs once they finish. results.md currently reports repetition 1.
+5. **Repetitions 2 and 3** (64 runs, started 13:57 UTC). They reuse repetition 1, so `resultados/principal/` holds all 96 runs once they finish. resultados.md currently reports repetition 1.
 6. Analysis: `./bancada.sh analise --varredura principal`.
 
 ## 11. Reproducing
 
 ```sh
-cd exame_2
+cd experimento
 caffeinate -dimsu ./experimentos.sh                  # calibration + 96 runs + analysis, about 4 h 30, on AC power
 ./bancada.sh varredura -nome principal -reps 1       # only the first repetition (32 runs)
 ./bancada.sh analise --varredura principal           # tables and figures

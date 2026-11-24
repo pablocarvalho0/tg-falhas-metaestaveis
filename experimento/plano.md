@@ -1,6 +1,6 @@
 # Experiment 2 — Server queue policies against the retry loop
 
-> **This is the original plan**, kept as a record of the design decisions. The experiment as actually executed — with Ŝ and W measured in calibration (Ŝ = 42.03 ms, W = 98 ms) instead of the nominal 42 and 100 ms — is described in [methodology.md](methodology.md), and its results in [results.md](results.md). Where they differ, methodology.md is authoritative.
+> **This is the original plan**, kept as a record of the design decisions. The experiment as actually executed — with Ŝ and W measured in calibration (Ŝ = 42.03 ms, W = 98 ms) instead of the nominal 42 and 100 ms — is described in [metodologia.md](metodologia.md), and its results in [resultados.md](resultados.md). Where they differ, metodologia.md is authoritative.
 
 Follow-up to experiment 1, the first LabExame bench (delivered separately). That experiment showed that with retries the service gets stuck after a transient database delay whenever load exceeds 1/(N + 1) of capacity, and that neither backoff with jitter nor cancelling abandoned requests at dequeue fixes it. This experiment compares four server queue policies, under two client retry policies, in a single factorial design.
 

@@ -9,11 +9,11 @@ When clients retry after a timeout, a transient slowdown can leave a service stu
 
 | Document | Content |
 |---|---|
-| [results.md](results.md) | What was found |
-| [methodology.md](methodology.md) | How it was measured, exactly as executed |
-| [apresentacao.html](apresentacao.html) | Presentation (Portuguese), a single self-contained file; open it in a browser |
-| [PLAN.md](PLAN.md) | The original plan, kept as a record of the design decisions |
-| [modelo/README.md](modelo/README.md) | Mathematical analysis and discrete-event simulation (Portuguese) |
+| [resultados.md](resultados.md) | What was found |
+| [metodologia.md](metodologia.md) | How it was measured, exactly as executed |
+| [apresentacao.html](../apresentacao/apresentacao.html) | Presentation (Portuguese), a single self-contained file; open it in a browser |
+| [plano.md](plano.md) | The original plan, kept as a record of the design decisions |
+| [modelo-matematico/README.md](modelo-matematico/README.md) | Mathematical analysis and discrete-event simulation (Portuguese) |
 | [../relatorio/](../relatorio/) | Final report (items 1–8 of the assignment, Portuguese) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How the code is organized and how to change it (Portuguese) |
 
@@ -57,12 +57,12 @@ Everything goes to `resultados/` (created by the run):
 
 | Path | What it is |
 |---|---|
-| `servico/` | Service under test (Go): 8 workers, 64-slot queue, the four queue policies, switchable at runtime through `POST /admin/policy` |
-| `carga/script.js` | Load generator (k6): open-loop arrivals, two client timeout classes, both retry policies |
+| `servidor/` | Service under test (Go): 8 workers, 64-slot queue, the four queue policies, switchable at runtime through `POST /admin/policy` |
+| `cliente/script.js` | Load generator (k6): open-loop arrivals, two client timeout classes, both retry policies |
 | `orquestrador/` | Orchestrator (Go): calibration, sweep, fault injection, series export, measurement guards |
 | `infra/` | Postgres, Toxiproxy (fault injection) and Prometheus images |
 | `analise/` | Analysis (Python): tables and figures; `estatistica.py` aggregates the repetitions |
-| `modelo/` | Closed-form model and simulator (Python, standard library only) |
+| `modelo-matematico/` | Closed-form model and simulator (Python, standard library only) |
 | `docker-compose.yml` | The bench |
 | `bancada.sh` | Wrapper for every command above |
 | `experimentos.sh` | The whole campaign in one command |

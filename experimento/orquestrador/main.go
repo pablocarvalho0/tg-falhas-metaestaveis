@@ -47,7 +47,7 @@ func flagsComuns(fs *flag.FlagSet) *Config {
 		PrometheusURL:    env("PROM_URL", "http://prometheus:9090"),
 		ToxiproxyURL:     env("TOXIPROXY_URL", "http://toxiproxy:8474"),
 		Proxy:            env("PROXY_NAME", "pg"),
-		ScriptK6:         env("K6_SCRIPT", "/carga/script.js"),
+		ScriptK6:         env("K6_SCRIPT", "/cliente/script.js"),
 		LimiarRecuperado: 0.95,
 		JanelaRecupS:     5,
 		JanelaFinalS:     30,

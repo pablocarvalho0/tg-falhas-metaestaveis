@@ -69,14 +69,14 @@ E duas formas de o cliente pedir de novo, as **políticas de retry**:
 
 | No restaurante | Na bancada | Pasta |
 |---|---|---|
-| A catraca que solta clientes | **k6**, o gerador de carga | `carga/` |
-| A cozinha e o chefe | **o serviço em Go**, com workers, fila e política | `servico/` |
+| A catraca que solta clientes | **k6**, o gerador de carga | `cliente/` |
+| A cozinha e o chefe | **o serviço em Go**, com workers, fila e política | `servidor/` |
 | A despensa | **Postgres**, o banco de dados | `infra/postgres/` |
 | O corredor até a despensa (onde aparece o bloqueio) | **Toxiproxy**, um proxy que injeta atraso | `infra/toxiproxy/` |
 | Uma câmera que fotografa o placar a cada 1 s | **Prometheus** | `infra/prometheus/` |
 | O diretor com cronômetro, que monta cada ensaio | **o orquestrador em Go** | `orquestrador/` |
 | O jornalista que escreve a matéria no fim | **a análise em Python** | `analise/` |
-| O professor que faz as contas no quadro | **o modelo e o simulador** | `modelo/` |
+| O professor que faz as contas no quadro | **o modelo e o simulador** | `modelo-matematico/` |
 
 ### Um ensaio, do começo ao fim
 
@@ -112,11 +112,11 @@ Isso se repete para **4 regras × 2 retries × 4 cargas = 32 ensaios**, três ve
 
 ### O mapa do slide "Protótipo"
 
-O slide **"Protótipo · A bancada e como ela foi testada"** da [apresentação](apresentacao.html)
+O slide **"Protótipo · A bancada e como ela foi testada"** da [apresentação](../apresentacao/apresentacao.html)
 tem 7 caixas. Cada uma é uma pasta:
 
 ```
-k6 (carga/) ──HTTP──► serviço Go (servico/) ──SQL──► Toxiproxy (infra/toxiproxy/) ──► Postgres (infra/postgres/)
+k6 (cliente/) ──HTTP──► serviço Go (servidor/) ──SQL──► Toxiproxy (infra/toxiproxy/) ──► Postgres (infra/postgres/)
                           │ /metrics
                           ▼
                    Prometheus (infra/prometheus/), coleta a cada 1 s  ◄── o k6 também envia métricas
@@ -129,23 +129,23 @@ k6 (carga/) ──HTTP──► serviço Go (servico/) ──SQL──► Toxipr
 
 | Caixa do slide | Onde está |
 |---|---|
-| Carga · k6 (carga aberta, 2 classes, timeout + retry) | `carga/script.js` |
-| Serviço · Go (8 workers, fila 64, 4 políticas de fila) | `servico/main.go`, `servico/server.go` |
+| Carga · k6 (carga aberta, 2 classes, timeout + retry) | `cliente/script.js` |
+| Serviço · Go (8 workers, fila 64, 4 políticas de fila) | `servidor/main.go`, `servidor/server.go` |
 | Toxiproxy (+200 ms por 20 s) | `infra/toxiproxy/`, comandado por `orquestrador/clientes.go` |
 | Postgres 17 (consulta de ~40 ms) | `infra/postgres/init.sql` |
 | Prometheus (séries a cada 1 s) | `infra/prometheus/prometheus.yml` |
 | Orquestrador · Go (política, k6, falha, CSV + manifesto) | `orquestrador/` |
 | Análise · Python (tabelas e figuras) | `analise/analise.py`, `analise/estatistica.py` |
-| "40 testes unitários + go vet, dentro do build" | `servico/server_test.go`, `orquestrador/metricas_test.go` e os `Dockerfile` |
+| "40 testes unitários + go vet, dentro do build" | `servidor/server_test.go`, `orquestrador/metricas_test.go` e os `Dockerfile` |
 
 Tudo sobe em containers pelo `docker-compose.yml`. **No seu computador só precisa de Docker.** Go,
 k6, Python, Postgres e Prometheus rodam dentro das imagens.
 
-### Peça 1 · O serviço (`servico/`): a cozinha
+### Peça 1 · O serviço (`servidor/`): a cozinha
 
 É a peça mais importante: é **o sistema sob teste**.
 
-**`servico/main.go`** é a porta de entrada. Ele lê a configuração das variáveis de ambiente
+**`servidor/main.go`** é a porta de entrada. Ele lê a configuração das variáveis de ambiente
 (`WORKERS=8`, `QUEUE=64`, `SERVICE_MS=40`, a política inicial, W, Ŝ…), conecta ao Postgres
 **pelo Toxiproxy** (`DB_URL` aponta para `toxiproxy:5433`, e não direto para o banco) e sobe o
 servidor HTTP. O comentário no topo do arquivo explica as duas escolhas deliberadas sem as quais o
@@ -154,7 +154,7 @@ laço de retry não poderia acontecer:
 1. a fila é grande o bastante para um pedido esperar mais que o timeout do cliente;
 2. **não há cancelamento**: se o cliente desiste, o pedido é processado mesmo assim.
 
-**`servico/server.go`** tem toda a lógica. Leia nesta ordem:
+**`servidor/server.go`** tem toda a lógica. Leia nesta ordem:
 
 | Função | O que faz | No restaurante |
 |---|---|---|
@@ -179,7 +179,7 @@ políticas (`fifo`, `timebound`, `deadline`, `lifo`) são constantes no topo do 
 | `svc_requests_needless_drops_total{class}` | descartes desnecessários: pedidos que ainda daria tempo de atender |
 | `svc_lifo_active` | 1 quando o LIFO está em modo de sobrecarga |
 
-### Peça 2 · A carga (`carga/script.js`): os clientes
+### Peça 2 · A carga (`cliente/script.js`): os clientes
 
 É um script do **k6**. Cada *iteração* do k6 é um **pedido lógico**, que pode virar até 4
 tentativas HTTP (1 + 3 retries).
@@ -243,11 +243,11 @@ execução) e `resumo.csv` (uma linha por execução).
   nomes bonitos das políticas.
 - **`estatistica.py`** agrega as 3 repetições (média ± desvio-padrão).
 
-### Peça 6 · O modelo (`modelo/`): o professor no quadro
+### Peça 6 · O modelo (`modelo-matematico/`): o professor no quadro
 
 É uma validação independente da bancada: `simulador.py` implementa as mesmas 4 políticas num
 simulador de eventos discretos, só com a biblioteca padrão do Python, em ~3 s e sem Docker. Se a
-bancada e o simulador discordam, um dos dois tem bug. Veja o [modelo/README.md](modelo/README.md).
+bancada e o simulador discordam, um dos dois tem bug. Veja o [modelo-matematico/README.md](modelo-matematico/README.md).
 
 ### Os dois scripts de entrada
 
@@ -260,21 +260,21 @@ bancada e o simulador discordam, um dos dois tem bug. Veja o [modelo/README.md](
 `RUN go vet ./... && go test -count=1 ./...`. Se um teste falha, a imagem não é construída e
 nenhum experimento roda com código quebrado.
 
-- `servico/server_test.go` (17 testes): um teste por política em `TestRetirar*`, fila cheia,
+- `servidor/server_test.go` (17 testes): um teste por política em `TestRetirar*`, fila cheia,
   desperdício na fila fixa, troca de política no ar, capacidade = C/T, métricas expostas.
 - `orquestrador/metricas_test.go` (23 testes): as funções puras de `metricas.go`, o plano da
   varredura, o resumo e o JSON com NaN.
 
 ```sh
 ./bancada.sh testes                           # pelo Docker, como no experimento
-cd servico && go test ./...                   # direto, se você tem Go instalado
+cd servidor && go test ./...                   # direto, se você tem Go instalado
 cd orquestrador && go test ./...
 ```
 
 ### Convenções
 
-- **Código, comentários, logs e tabelas em português**; os documentos `PLAN.md`, `methodology.md`
-  e `results.md` estão em inglês.
+- **Código, comentários, logs e tabelas em português**; os documentos `plano.md`, `metodologia.md`
+  e `resultados.md` estão em inglês.
 - **Lógica que vira número vai para função pura e ganha teste.** No orquestrador isso fica em
   `metricas.go`; no serviço, `retirar` é testável sem rede (veja `servidorParado` e `jobCom` nos
   testes).
@@ -326,13 +326,13 @@ Exemplo: `./bancada.sh cenario -fila timebound -politica fixed -carga 70 -max-wa
 
 Este é o caso mais comum. Toque nestes lugares, nesta ordem:
 
-1. **`servico/server.go`**
+1. **`servidor/server.go`**
    - crie a constante (por exemplo, `PolNova = "nova"`) e inclua-a em `politicasValidas`;
    - adicione um `case PolNova:` em **`retirar`**, que devolve o pedido escolhido e o `motivo` do
      descarte (`""` para processar). Se precisar de um motivo novo, crie a constante e inclua-a em
      `motivos`.
    - Se a política tiver um parâmetro, adicione o campo em `Politica` e trate-o em `handleAdmin`.
-2. **`servico/server_test.go`**: escreva um `TestRetirarNova` no estilo dos outros
+2. **`servidor/server_test.go`**: escreva um `TestRetirarNova` no estilo dos outros
    (`servidorParado` + `jobCom`) e um teste de ponta a ponta, se fizer sentido.
 3. **`orquestrador/main.go`**: inclua o nome em `listaFilas` e no texto de ajuda da flag
    `-fila`/`-filas`.
@@ -341,13 +341,13 @@ Este é o caso mais comum. Toque nestes lugares, nesta ordem:
 5. **`orquestrador/cenario.go`**: se criou um motivo de descarte, inclua-o na lista de `extras()`
    para virar coluna no CSV.
 6. **`analise/analise.py`**: inclua o nome em `FILAS` e em `NOME_FILA`.
-7. *(opcional)* **`modelo/simulador.py`**: implemente-a também, para ter a previsão teórica.
+7. *(opcional)* **`modelo-matematico/simulador.py`**: implemente-a também, para ter a previsão teórica.
 
 Depois: `./bancada.sh testes` e um `./bancada.sh cenario -fila nova -politica fixed -carga 70`.
 
 ### Adicionar uma métrica nova
 
-1. **Serviço**: registre o contador ou medidor em `NewServer` (`servico/server.go`) e incremente
+1. **Serviço**: registre o contador ou medidor em `NewServer` (`servidor/server.go`) e incremente
    onde acontece.
 2. **Orquestrador**: inclua um `extra{Coluna: ..., Seletor: ...}` em `extras()`
    (`orquestrador/cenario.go`). A coluna aparece no `series.csv`.
@@ -377,9 +377,9 @@ os dados:
 
 Se você vai explicar o código na arguição, ou quer mexer pela primeira vez, leia nesta ordem:
 
-1. `servico/server.go`: `retirar`, depois `handleWork` e depois `processar`. É **o experimento**.
+1. `servidor/server.go`: `retirar`, depois `handleWork` e depois `processar`. É **o experimento**.
 2. `orquestrador/cenario.go`: `executarCenario`. É **a linha do tempo de uma execução**.
-3. `carga/script.js`: a função `default`. É **o cliente com retry**.
+3. `cliente/script.js`: a função `default`. É **o cliente com retry**.
 4. `orquestrador/metricas.go`: `tempoRecuperacao` e `classificar`. É **o que conta como
    "recuperou"**.
 

@@ -1,4 +1,4 @@
-module exame/servico
+module falhas-metaestaveis/servidor
 
 go 1.25.0
 

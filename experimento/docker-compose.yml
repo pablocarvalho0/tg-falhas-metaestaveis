@@ -1,4 +1,4 @@
-# Experimento 2 — políticas de fila contra o laço de retry (ver PLAN.md).
+# Experimento 2 — políticas de fila contra o laço de retry (ver plano.md).
 #
 #   k6 (carga aberta, duas classes de cliente, retry no cliente)
 #     └─► servico (Go: C workers, fila Q, política de fila) ─► toxiproxy ─► postgres
@@ -6,7 +6,7 @@
 #   bancada (orquestrador Go) troca a política, liga o atraso, roda o k6 e exporta CSV
 #
 # Uso: ./bancada.sh tudo
-name: exame2-csc27
+name: falhas-metaestaveis
 
 services:
   postgres:
@@ -38,7 +38,7 @@ services:
   # política de fila pode ser trocada no ar (POST /admin/policy); as variáveis
   # abaixo são só os valores iniciais.
   servico:
-    build: ./servico
+    build: ./servidor
     environment:
       WORKERS: ${WORKERS:-8}            # C
       QUEUE: ${QUEUE:-64}               # Q, o mesmo para todas as políticas

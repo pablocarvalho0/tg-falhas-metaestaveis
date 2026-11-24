@@ -20,7 +20,7 @@ import (
 // a consulta ao Postgres; nos testes é uma função controlada.
 type WorkFunc func(ctx context.Context, seq uint64) error
 
-// Políticas de fila (ver PLAN.md, seção 4).
+// Políticas de fila (ver plano.md, seção 4).
 const (
 	PolFixa     = "fifo"      // 1: fila fixa, nunca descarta
 	PolTempo    = "timebound" // 2: descarta na saída quem esperou mais que W
