@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Campanha completa do experimento 2 (PLAN.md): calibração, varredura principal
+# Campanha completa do experimento 2 (plano.md): calibração, varredura principal
 # (4 políticas de fila × 2 clientes × 4 cargas × 3 repetições = 96 execuções)
 # e análise. Cerca de 4 h 30.
 #

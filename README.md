@@ -15,11 +15,11 @@ Orientação: Prof.ª Juliana de Melo Bezerra
 | Entrega | Onde |
 |---|---|
 | Relatório (PDF, itens 1–8 do anexo) | [`relatorio/relatorio.pdf`](relatorio/relatorio.pdf) |
-| Apresentação | [`exame_2/apresentacao.pdf`](exame_2/apresentacao.pdf) · [`.html`](exame_2/apresentacao.html) (baixe e abra no navegador) |
-| Código | [`exame_2/`](exame_2/) |
-| Metodologia detalhada e resultados completos | [`exame_2/methodology.md`](exame_2/methodology.md) · [`exame_2/results.md`](exame_2/results.md) |
-| Reprodutibilidade em duas máquinas | [`exame_2/reprodutibilidade.md`](exame_2/reprodutibilidade.md) |
-| Análise matemática e simulação | [`exame_2/modelo/`](exame_2/modelo/) |
+| Apresentação | [`apresentacao/apresentacao.pdf`](apresentacao/apresentacao.pdf) · [`.html`](apresentacao/apresentacao.html) (baixe e abra no navegador) |
+| Código | [`experimento/`](experimento/) |
+| Metodologia detalhada e resultados completos | [`experimento/metodologia.md`](experimento/metodologia.md) · [`experimento/resultados.md`](experimento/resultados.md) |
+| Reprodutibilidade em duas máquinas | [`experimento/reprodutibilidade.md`](experimento/reprodutibilidade.md) |
+| Análise matemática e simulação | [`experimento/modelo-matematico/`](experimento/modelo-matematico/) |
 
 ---
 
@@ -154,12 +154,12 @@ Cada execução dura 150 s:
 
 | Parte | Arquivos | Linhas |
 |---|---|---:|
-| Serviço | [`exame_2/servico/`](exame_2/servico/) | ~710 |
-| Carga | [`exame_2/carga/script.js`](exame_2/carga/script.js) | ~160 |
-| Orquestrador | [`exame_2/orquestrador/`](exame_2/orquestrador/) | ~3.400 com testes |
-| Análise e estatística | [`exame_2/analise/`](exame_2/analise/) | ~420 |
-| Modelo e simulador | [`exame_2/modelo/simulador.py`](exame_2/modelo/simulador.py) | ~310 |
-| Infraestrutura | [`exame_2/docker-compose.yml`](exame_2/docker-compose.yml), [`exame_2/infra/`](exame_2/infra/) | — |
+| Serviço | [`experimento/servidor/`](experimento/servidor/) | ~710 |
+| Carga | [`experimento/cliente/script.js`](experimento/cliente/script.js) | ~160 |
+| Orquestrador | [`experimento/orquestrador/`](experimento/orquestrador/) | ~3.400 com testes |
+| Análise e estatística | [`experimento/analise/`](experimento/analise/) | ~420 |
+| Modelo e simulador | [`experimento/modelo-matematico/simulador.py`](experimento/modelo-matematico/simulador.py) | ~310 |
+| Infraestrutura | [`experimento/docker-compose.yml`](experimento/docker-compose.yml), [`experimento/infra/`](experimento/infra/) | — |
 
 ### Testes realizados
 
@@ -219,7 +219,7 @@ os impacientes. Prazo e LIFO: voltam em menos de 1 s.*
 
 ### Análise matemática
 
-Detalhes em [`exame_2/modelo/README.md`](exame_2/modelo/README.md).
+Detalhes em [`experimento/modelo-matematico/README.md`](experimento/modelo-matematico/README.md).
 
 | Grandeza | Conta | Previsto | Medido |
 |---|---|---:|---:|
@@ -237,7 +237,7 @@ Detalhes em [`exame_2/modelo/README.md`](exame_2/modelo/README.md).
   capacidade, e o laço perde o combustível.
 
 **Achado: 25 % é condição necessária, não suficiente.** O simulador
-([`simulador.py`](exame_2/modelo/simulador.py), só Python, ~3 s) reproduz o desfecho das 32
+([`simulador.py`](experimento/modelo-matematico/simulador.py), só Python, ~3 s) reproduz o desfecho das 32
 células da bancada. Varrendo a carga com 10 sementes:
 
 - a fila fixa nunca fica presa até 28 %;
@@ -262,7 +262,7 @@ O código, os parâmetros e as sementes são os mesmos. As políticas se ajustam
 cada máquina. Nas primeiras execuções, os desfechos coincidem. A primeira divergência apareceu
 numa célula de fronteira: com o limite fixo a 50 % de carga, os impacientes ficaram com 10 %
 sem resposta na máquina A e 0 % na máquina B. A comparação completa, com o que muda e o que se
-mantém, está em [`exame_2/reprodutibilidade.md`](exame_2/reprodutibilidade.md) (em andamento).
+mantém, está em [`experimento/reprodutibilidade.md`](experimento/reprodutibilidade.md) (em andamento).
 
 ### Como instalar e executar
 
@@ -270,7 +270,7 @@ Requisito: Docker com Compose. Nada mais no host.
 
 ```sh
 git clone -b claude/bold-mayer-9xa28u https://github.com/pablocarvalho0/tg-falhas-metaestaveis
-cd tg-falhas-metaestaveis/exame_2
+cd tg-falhas-metaestaveis/experimento
 
 ./bancada.sh testes                                         # build + 40 testes unitários
 ./bancada.sh calibrar                                       # mede capacidade e tempo de serviço
@@ -279,8 +279,8 @@ cd tg-falhas-metaestaveis/exame_2
 ./bancada.sh analise --varredura principal                  # tabelas e figuras
 python3 analise/estatistica.py resultados/principal/resumo.csv   # média ± dp das repetições
 
-python3 modelo/simulador.py analitico                       # contas fechadas, sem Docker
-python3 modelo/simulador.py grade --reps 3                  # simulação do mesmo desenho
+python3 modelo-matematico/simulador.py analitico                       # contas fechadas, sem Docker
+python3 modelo-matematico/simulador.py grade --reps 3                  # simulação do mesmo desenho
 ```
 
 Cada execução grava, em `resultados/principal/execucoes/<id>/`:
@@ -346,18 +346,34 @@ equipe]*
 
 ## Mapa do repositório
 
+Cada pasta corresponde a uma peça da explicação: **cliente** manda pedidos com timeout e retry
+→ **servidor** enfileira e aplica a política de fila → **infra** injeta a falha no banco →
+**orquestrador** conduz cada execução → **resultados** guarda os dados → **analise** e
+**modelo-matematico** explicam o que aconteceu.
+
 ```
-README.md                  ← você está aqui
-relatorio/                 relatório (md, html, pdf) e figuras
-exame_2/                   experimento 2: código, metodologia, resultados, apresentação
-  servico/                 serviço Go com as 4 políticas de fila
-  carga/                   gerador de carga k6
-  orquestrador/            orquestrador Go (calibração, falha, coleta)
-  analise/                 análise e estatística (Python)
-  modelo/                  análise matemática e simulador
-docs/decisoes/             decisões de escopo (0001: escopo do semestre; 0002: mudança de foco)
-PROXIMOS_PASSOS.md         tarefas abertas da equipe
-index.html                 nota de escopo do TG: https://pablocarvalho0.github.io/tg-falhas-metaestaveis/
+README.md                    ← você está aqui: o trabalho inteiro em uma página
+experimento/                 a bancada e o experimento das 4 políticas de fila
+  cliente/                   gerador de carga (k6): chegadas abertas, timeout, retry fixo ou backoff
+  servidor/                  serviço sob teste (Go): 8 workers, fila de 64, as 4 políticas de fila
+  infra/                     Postgres (banco), Toxiproxy (injeta a falha), Prometheus (coleta)
+  orquestrador/              (Go) calibra, troca a política, liga e desliga a falha, grava os dados
+  resultados/                dados brutos: um CSV por segundo e um manifesto por execução
+  analise/                   tabelas, figuras e estatística das repetições (Python)
+  modelo-matematico/         contas fechadas e simulador que preveem a bancada (Python)
+  plano.md                   o desenho do experimento, como planejado
+  metodologia.md             como foi medido, exatamente como executado
+  resultados.md              o que foi encontrado (máquina A)
+  reprodutibilidade.md       a mesma campanha numa segunda máquina
+  docker-compose.yml         sobe a bancada inteira
+  bancada.sh                 um comando por etapa (testes, calibrar, cenario, varredura, analise)
+  experimentos.sh            a campanha completa (96 execuções)
+apresentacao/                slides da apresentação final (html e pdf)
+relatorio/                   relatório do exame (md, html, pdf) e figuras
+docs/                        fundamentação e decisões (0001: escopo do semestre; 0002: mudança de foco)
+tg/v0-esqueleto/             esqueleto antigo do TG, anterior ao exame (histórico)
+index.html                   nota de escopo do TG: https://pablocarvalho0.github.io/tg-falhas-metaestaveis/
+PROXIMOS_PASSOS.md           tarefas abertas da equipe
 ```
 
 ## Referências

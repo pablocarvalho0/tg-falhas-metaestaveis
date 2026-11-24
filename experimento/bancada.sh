@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Experimento 2 — políticas de fila contra o laço de retry (ver PLAN.md).
+# Experimento 2 — políticas de fila contra o laço de retry (ver plano.md).
 # Tudo roda em containers; no host só é preciso Docker com Compose.
 #
 #   ./bancada.sh tudo                      calibra μ e roda a varredura do plano (96 execuções, ~4 h 20)

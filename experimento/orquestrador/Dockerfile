@@ -1,4 +1,4 @@
-# Contexto de build: a raiz do projeto (exame/), para incluir carga/script.js.
+# Contexto de build: a raiz do projeto (experimento/), para incluir cliente/script.js.
 FROM golang:1.25.0-alpine3.22 AS build
 WORKDIR /src
 COPY orquestrador/go.mod ./
@@ -11,6 +11,6 @@ RUN CGO_ENABLED=0 go build -o /out/orquestrador .
 FROM grafana/k6:1.3.0
 USER root
 COPY --from=build /out/orquestrador /usr/local/bin/orquestrador
-COPY carga/script.js /carga/script.js
+COPY cliente/script.js /cliente/script.js
 WORKDIR /resultados
 ENTRYPOINT ["orquestrador"]

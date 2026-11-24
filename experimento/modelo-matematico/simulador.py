@@ -4,13 +4,13 @@ Objetivo: prever, sem Docker, o que a bancada mede, e checar se os resultados
 fazem sentido pela teoria de filas. Só biblioteca padrão do Python.
 
 Uso:
-    python3 modelo/simulador.py analitico          # contas fechadas (fronteira, esperas, capacidade na falha)
-    python3 modelo/simulador.py grade              # 4 filas x 2 clientes x 4 cargas (mesmo desenho da bancada)
-    python3 modelo/simulador.py fronteira          # fila fixa varrendo a carga de 5 em 5 %: onde o laço fecha?
-    python3 modelo/simulador.py fronteira --svg modelo/fronteira.svg
-    python3 modelo/simulador.py transicao --reps 10   # fila fixa, 26–40 %: fração de execuções presas
+    python3 modelo-matematico/simulador.py analitico          # contas fechadas (fronteira, esperas, capacidade na falha)
+    python3 modelo-matematico/simulador.py grade              # 4 filas x 2 clientes x 4 cargas (mesmo desenho da bancada)
+    python3 modelo-matematico/simulador.py fronteira          # fila fixa varrendo a carga de 5 em 5 %: onde o laço fecha?
+    python3 modelo-matematico/simulador.py fronteira --svg modelo-matematico/fronteira.svg
+    python3 modelo-matematico/simulador.py transicao --reps 10   # fila fixa, 26–40 %: fração de execuções presas
 
-Parâmetros iguais aos da bancada (methodology.md): C = 8 workers, Q = 64,
+Parâmetros iguais aos da bancada (metodologia.md): C = 8 workers, Q = 64,
 Ŝ = 42 ms, falha +200 ms por 20 s, timeouts 100/200 ms (50 % cada), N = 3
 retries, W = 98 ms, margem 10 ms, janela do detector LIFO 100 ms.
 

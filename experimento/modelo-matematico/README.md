@@ -6,10 +6,10 @@ mesmas 4 políticas de fila e os 2 clientes com os parâmetros calibrados (C = 8
 Ŝ = 42 ms, falha +200 ms por 20 s, timeouts 100/200 ms, N = 3, W = 98 ms).
 
 ```sh
-python3 modelo/simulador.py analitico            # contas fechadas
-python3 modelo/simulador.py grade --reps 3       # mesmo desenho 4 × 2 × 4 da bancada
-python3 modelo/simulador.py fronteira --reps 3 --svg modelo/fronteira.svg
-python3 modelo/simulador.py transicao --reps 10  # fila fixa entre 26 e 40 %
+python3 modelo-matematico/simulador.py analitico            # contas fechadas
+python3 modelo-matematico/simulador.py grade --reps 3       # mesmo desenho 4 × 2 × 4 da bancada
+python3 modelo-matematico/simulador.py fronteira --reps 3 --svg modelo-matematico/fronteira.svg
+python3 modelo-matematico/simulador.py transicao --reps 10  # fila fixa entre 26 e 40 %
 ```
 
 As saídas desta versão estão em `saida_*.txt` e `fronteira.svg`.
@@ -79,5 +79,5 @@ repetições = 24 execuções, ~1 h) para medir a transição real e comparar co
 
 - Sem rede e sem engasgadas do ambiente; o ruído do tempo de serviço é só normal, com dp de 1,5 ms.
 - A falha é aplicada a quem *começa* o serviço durante a janela, não a cada resposta do banco.
-- O simulador foi escrito a partir da descrição das políticas (methodology.md), não do código Go.
+- O simulador foi escrito a partir da descrição das políticas (metodologia.md), não do código Go.
   Concordar com a bancada é evidência de que as duas implementações estão certas, mas não é prova.

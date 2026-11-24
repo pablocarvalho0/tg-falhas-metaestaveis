@@ -125,11 +125,11 @@ recuperação.
 
 | Parte | Arquivos | Linhas |
 |---|---|---:|
-| Serviço | `exame_2/servico/server.go`, `main.go` | ~710 |
-| Carga | `exame_2/carga/script.js` | ~160 |
-| Orquestrador | `exame_2/orquestrador/*.go` (com testes) | ~3.400 |
-| Análise | `exame_2/analise/analise.py`, `estatistica.py` | ~420 |
-| Modelo e simulação | `exame_2/modelo/simulador.py` | ~300 |
+| Serviço | `experimento/servidor/server.go`, `main.go` | ~710 |
+| Carga | `experimento/cliente/script.js` | ~160 |
+| Orquestrador | `experimento/orquestrador/*.go` (com testes) | ~3.400 |
+| Análise | `experimento/analise/analise.py`, `estatistica.py` | ~420 |
+| Modelo e simulação | `experimento/modelo-matematico/simulador.py` | ~300 |
 
 ## 5.2 Testes realizados
 
@@ -176,7 +176,7 @@ Os percentuais entre parênteses são a fração respondida no prazo nos último
 
 ## 5.4 Análise matemática
 
-Detalhes e código em `exame_2/modelo/`.
+Detalhes e código em `experimento/modelo-matematico/`.
 
 - **Capacidade:** μ = C/Ŝ = 190,5 req/s (medido: 190,45). Na falha, μf = C/(Ŝ + 200 ms) =
   33 req/s.
@@ -230,7 +230,7 @@ retries limitados sem retry budget.
 | João Guerreiro | **[PREENCHER]** | **[ ]** |
 | Lucas de Sousa | **[PREENCHER]** | **[ ]** |
 | Marcelo Hippolyto | **[PREENCHER]** | **[ ]** |
-| Pablo Carvalho | **[PREENCHER]** — sugestão: análise matemática e simulação (`exame_2/modelo/`) | **[ ]** |
+| Pablo Carvalho | **[PREENCHER]** — sugestão: análise matemática e simulação (`experimento/modelo-matematico/`) | **[ ]** |
 
 # 8. Uso de IA
 
@@ -244,14 +244,14 @@ resultados. Cada membro deve conseguir explicar a própria parte do código.
 Requisito: Docker com Compose.
 
 ```sh
-cd exame_2
+cd experimento
 ./bancada.sh testes                     # build + testes unitários
 ./bancada.sh calibrar                   # mede μ e Ŝ
 ./experimentos.sh                       # campanha completa: 96 execuções, ~4 h 30
 ./bancada.sh cenario -fila lifo -politica fixed -carga 70   # uma execução
 ./bancada.sh analise --varredura principal                  # tabelas e figuras
 python3 analise/estatistica.py resultados/principal/resumo.csv   # média ± dp das repetições
-python3 modelo/simulador.py grade       # simulação, sem Docker
+python3 modelo-matematico/simulador.py grade       # simulação, sem Docker
 ```
 
 # Referências

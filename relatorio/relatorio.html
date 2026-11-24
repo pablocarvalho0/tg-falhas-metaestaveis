@@ -263,6 +263,11 @@ aquecimento, 30 s de regime, 20 s de falha e 90 s de recuperação.</p>
 <h1 id="protótipo">5. Protótipo</h1>
 <h2 id="implementação">5.1 Implementação</h2>
 <table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 30%" />
+<col style="width: 40%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th>Parte</th>
@@ -273,28 +278,29 @@ aquecimento, 30 s de regime, 20 s de falha e 90 s de recuperação.</p>
 <tbody>
 <tr class="odd">
 <td>Serviço</td>
-<td><code>exame_2/servico/server.go</code>, <code>main.go</code></td>
+<td><code>experimento/servidor/server.go</code>,
+<code>main.go</code></td>
 <td style="text-align: right;">~710</td>
 </tr>
 <tr class="even">
 <td>Carga</td>
-<td><code>exame_2/carga/script.js</code></td>
+<td><code>experimento/cliente/script.js</code></td>
 <td style="text-align: right;">~160</td>
 </tr>
 <tr class="odd">
 <td>Orquestrador</td>
-<td><code>exame_2/orquestrador/*.go</code> (com testes)</td>
+<td><code>experimento/orquestrador/*.go</code> (com testes)</td>
 <td style="text-align: right;">~3.400</td>
 </tr>
 <tr class="even">
 <td>Análise</td>
-<td><code>exame_2/analise/analise.py</code>,
+<td><code>experimento/analise/analise.py</code>,
 <code>estatistica.py</code></td>
 <td style="text-align: right;">~420</td>
 </tr>
 <tr class="odd">
 <td>Modelo e simulação</td>
-<td><code>exame_2/modelo/simulador.py</code></td>
+<td><code>experimento/modelo-matematico/simulador.py</code></td>
 <td style="text-align: right;">~300</td>
 </tr>
 </tbody>
@@ -420,7 +426,7 @@ req/s de pacientes que ainda seriam atendidos.</li>
 recuperação.</li>
 </ul>
 <h2 id="análise-matemática">5.4 Análise matemática</h2>
-<p>Detalhes e código em <code>exame_2/modelo/</code>.</p>
+<p>Detalhes e código em <code>experimento/modelo-matematico/</code>.</p>
 <ul>
 <li><strong>Capacidade:</strong> μ = C/Ŝ = 190,5 req/s (medido: 190,45).
 Na falha, μf = C/(Ŝ + 200 ms) = 33 req/s.</li>
@@ -513,7 +519,7 @@ impreciso).</li>
 <tr class="even">
 <td>Pablo Carvalho</td>
 <td><strong>[PREENCHER]</strong> — sugestão: análise matemática e
-simulação (<code>exame_2/modelo/</code>)</td>
+simulação (<code>experimento/modelo-matematico/</code>)</td>
 <td style="text-align: right;"><strong>[ ]</strong></td>
 </tr>
 </tbody>
@@ -527,14 +533,14 @@ verificação dos resultados. Cada membro deve conseguir explicar a
 própria parte do código.</p>
 <h1 id="como-instalar-e-executar">Como instalar e executar</h1>
 <p>Requisito: Docker com Compose.</p>
-<pre class="sh"><code>cd exame_2
+<pre class="sh"><code>cd experimento
 ./bancada.sh testes                     # build + testes unitários
 ./bancada.sh calibrar                   # mede μ e Ŝ
 ./experimentos.sh                       # campanha completa: 96 execuções, ~4 h 30
 ./bancada.sh cenario -fila lifo -politica fixed -carga 70   # uma execução
 ./bancada.sh analise --varredura principal                  # tabelas e figuras
 python3 analise/estatistica.py resultados/principal/resumo.csv   # média ± dp das repetições
-python3 modelo/simulador.py grade       # simulação, sem Docker</code></pre>
+python3 modelo-matematico/simulador.py grade       # simulação, sem Docker</code></pre>
 <h1 id="referências">Referências</h1>
 <ul>
 <li>N. Bronson, A. Aghayev, A. Charapko, T. Zhu. <em>Metastable Failures

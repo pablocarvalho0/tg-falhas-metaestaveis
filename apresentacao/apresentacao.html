@@ -521,13 +521,13 @@ table.dados td { padding: 10px 14px 10px 0; border-top: 1px solid var(--grade); 
 <section class="slide">
   <p class="sobre">Como executar</p>
   <h1>Um comando por etapa, só Docker no host</h1>
-<pre class="codigo"><span class="k">cd</span> exame_2
+<pre class="codigo"><span class="k">cd</span> experimento
 ./bancada.sh testes                 <span class="c"># build + 40 testes unitários</span>
 ./bancada.sh calibrar               <span class="c"># mede μ e Ŝ</span>
 ./experimentos.sh                   <span class="c"># 96 execuções, ~4 h 30</span>
 ./bancada.sh cenario -fila lifo -politica fixed -carga 70
 ./bancada.sh analise --varredura principal
-python3 modelo/simulador.py grade   <span class="c"># simulação, sem Docker</span></pre>
+python3 modelo-matematico/simulador.py grade   <span class="c"># simulação, sem Docker</span></pre>
   <p class="miudo">Cada execução grava series.csv (1 s) e manifesto.json (configuração, instantes reais da falha, versões).</p>
 </section>
 

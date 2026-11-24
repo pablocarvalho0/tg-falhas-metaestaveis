@@ -8,11 +8,11 @@ do código nem os parâmetros do experimento.
 
 > **Status:** campanha na máquina B **em andamento**. Esta página é atualizada ao fim das
 > 96 execuções. Os dados brutos estão em `resultados/` (máquina B). Os dados da máquina A
-> ficaram no laptop: só os números do `results.md` estão no repositório.
+> ficaram no laptop: só os números do `resultados.md` estão no repositório.
 
 ## As duas máquinas
 
-| | Máquina A (results.md, slides) | Máquina B (esta página) |
+| | Máquina A (resultados.md, slides) | Máquina B (esta página) |
 |---|---|---|
 | Hardware | MacBook, Apple Silicon (arm64) | VM em nuvem, Intel Xeon 2,3 GHz (x86_64), KVM |
 | Ambiente Docker | Colima: VM Linux 6.8, **2 vCPU, 2 GB** | Linux 6.18, **4 vCPU, 15 GB**, Docker 29.10 |
@@ -35,7 +35,7 @@ Nenhuma delas muda o código nem o desenho experimental:
   nenhuma iteração.
 - A VM foi recolhida uma vez durante a campanha (sessão ociosa), matando a execução 4. A
   varredura foi retomada. Execuções sem `manifesto.json` são refeitas, as completas são
-  reaproveitadas, como previsto em `methodology.md` §10.
+  reaproveitadas, como previsto em `metodologia.md` §10.
 
 ## Calibração
 
@@ -52,7 +52,7 @@ Nenhuma delas muda o código nem o desenho experimental:
 (44,8 ms) porque ele é dominado pela consulta de 40 ms no Postgres, não pela CPU. As duas
 calibrações passam nos mesmos critérios com folga parecida. O orquestrador deriva Ŝ e W da
 calibração de cada máquina, então as políticas se ajustam sozinhas, que é exatamente o que o
-desenho previa (`methodology.md` §7).
+desenho previa (`metodologia.md` §7).
 
 ## Desfechos: máquina A × máquina B
 
@@ -68,7 +68,7 @@ medida que a campanha avança.
 
 **Primeira divergência.** Na máquina A, o limite fixo a 50 % deixou 10 % dos impacientes sem
 resposta no fim. Na máquina B, 0 %. Isso é coerente com o mecanismo descrito no
-`results.md` §3.2: o limite fixo prejudica o impaciente quando W é maior que a espera útil dele.
+`resultados.md` §3.2: o limite fixo prejudica o impaciente quando W é maior que a espera útil dele.
 Com Ŝ menor na máquina B, sobra mais folga, e as rajadas que empurram a fila além de 48 ms de
 espera ficam mais raras.
 
@@ -86,4 +86,4 @@ espera ficam mais raras.
 ## Conclusão (a completar ao fim da campanha)
 
 *[preenchido ao fim das 96 execuções: quantas células concordam, quais divergem, e se as
-conclusões do results.md se mantêm]*
+conclusões do resultados.md se mantêm]*
