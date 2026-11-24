@@ -15,6 +15,7 @@ When clients retry after a timeout, a transient slowdown can leave a service stu
 | [PLAN.md](PLAN.md) | The original plan, kept as a record of the design decisions |
 | [modelo/README.md](modelo/README.md) | Mathematical analysis and discrete-event simulation (Portuguese) |
 | [../relatorio/](../relatorio/) | Final report (items 1–8 of the assignment, Portuguese) |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How the code is organized and how to change it (Portuguese) |
 
 ## Running it
 
