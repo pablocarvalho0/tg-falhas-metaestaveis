@@ -368,10 +368,10 @@ experimento/                 a bancada e o experimento das 4 políticas de fila
   docker-compose.yml         sobe a bancada inteira
   bancada.sh                 um comando por etapa (testes, calibrar, cenario, varredura, analise)
   experimentos.sh            a campanha completa (96 execuções)
+  CONTRIBUTING.md            como o código está organizado e como mexer nele
 apresentacao/                slides da apresentação final (html e pdf)
 relatorio/                   relatório do exame (md, html, pdf) e figuras
 docs/                        fundamentação e decisões (0001: escopo do semestre; 0002: mudança de foco)
-tg/v0-esqueleto/             esqueleto antigo do TG, anterior ao exame (histórico)
 index.html                   nota de escopo do TG: https://pablocarvalho0.github.io/tg-falhas-metaestaveis/
 PROXIMOS_PASSOS.md           tarefas abertas da equipe
 ```
