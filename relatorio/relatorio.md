@@ -60,7 +60,7 @@ Construir uma **bancada aberta e reprodutível** e usá-la para responder:
 O trabalho tem dois experimentos. O **experimento 1** mediu a fronteira de recuperação em
 função da carga e da política de retry. Ele mostrou que o laço fecha e que backoff com jitter
 não resolve. O **experimento 2**, foco deste relatório, compara 4 políticas de fila sob 2
-políticas de retry. A mudança de foco está registrada em `docs/decisoes/0002`.
+políticas de retry. A mudança de foco está registrada em `docs/decisoes/0002-pivo-politicas-de-fila.md`.
 
 # 4. Proposta
 

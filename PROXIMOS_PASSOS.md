@@ -1,14 +1,15 @@
 # Fechamento do Lab Exame — o que falta
 
-MVP no branch `claude/bold-mayer-9xa28u`. Tudo o que está aqui é rascunho para a equipe revisar
-e assumir. Entregas: **apresentação final (24/nov ou 01/dez — confirmar)** e **relatório + código
+Tudo está na `main`. O que está aqui é rascunho para a equipe revisar e assumir. Entregas: **apresentação final (24/nov ou 01/dez — confirmar)** e **relatório + código
 até 01/dez** no Classroom.
 
 ## O que já está no repo
 
 | Entrega | Onde | Estado |
 |---|---|---|
-| Código da bancada (serviço, carga, orquestrador, análise) | `experimento/` | pronto; 40 testes passam |
+| Código da bancada (cliente, servidor, orquestrador, análise) | `experimento/` | pronto; 40 testes passam |
+| Guia do código | `experimento/CONTRIBUTING.md` | pronto |
+| Reprodutibilidade em duas máquinas | `experimento/reprodutibilidade.md` | calibração + primeiras execuções; completa ao fim da campanha |
 | Plano, metodologia, resultados (repetição 1) | `experimento/plano.md`, `metodologia.md`, `resultados.md` | pronto, em inglês |
 | Análise matemática + simulador | `experimento/modelo-matematico/` | pronto |
 | Estatística das 3 repetições | `experimento/analise/estatistica.py` | pronto, falta rodar com os dados |
@@ -18,14 +19,15 @@ até 01/dez** no Classroom.
 
 ## Tarefas abertas
 
-Marque seu nome e faça PR para este branch.
+Marque seu nome e faça PR para a `main`.
 
 | # | Tarefa | Dono | Prazo |
 |---|---|---|---|
 | 1 | Confirmar a data da apresentação final | | hoje |
-| 2 | Subir `resultados/principal/` (96 execuções: `resumo.csv`, `series.csv`, `manifesto.json`) e rodar `python3 analise/estatistica.py resultados/principal/resumo.csv` | quem rodou a campanha | |
-| 3 | Atualizar `resultados.md`, a seção 5.3 do relatório e o slide 13 com as 3 repetições (média ± dp) | | |
-| 4 | Subir o **experimento 1** em `exame_1/` (código + resultados) — o relatório se apoia nele | | |
+| 2 | Campanha de 96 execuções na máquina B (Linux): rodando; ao fim, dados em `experimento/resultados/principal/` + `estatistica.py` | Claude (em andamento) | 24/nov |
+| 3 | Atualizar `resultados.md`, a seção 5.3 do relatório e os slides de resultados com as 3 repetições (média ± dp) + doc de divergências Mac × Linux | Claude, depois da campanha; Pablo atualiza os slides | |
+| 3b | Rodar a mesma campanha no Mac (máquina A) com as 3 repetições, para comparar | dono do Mac | |
+| 4 | Subir o **experimento 1** em `experimento-1/` (código + resultados) — o relatório se apoia nele | | |
 | 5 | Rodar na bancada a fila fixa a 25, 30, 35 e 40 % (2 clientes × 3 reps, ~1 h) e comparar com a simulação (`modelo-matematico/saida_transicao.txt`) | Pablo | |
 | 6 | Resolver os `[a verificar]` dos trabalhos relacionados e completar as 2 referências incompletas | | |
 | 7 | Preencher **organização do grupo** (relatório §7 + último slide): atividades e % | todos | |

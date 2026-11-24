@@ -78,7 +78,7 @@ Este trabalho é a segunda volta de uma investigação:
 
 - **Experimento 1:** mostrou que o laço fecha e que nenhuma política de retry no cliente resolve.
 - **Experimento 2 (este):** desloca o foco para o servidor. A mudança está registrada em
-  [`docs/decisoes/0002`](docs/decisoes/0002-pivo-politicas-de-fila.md).
+  [`docs/decisoes/0002-pivo-politicas-de-fila.md`](docs/decisoes/0002-pivo-politicas-de-fila.md).
 
 ## 4. Proposta
 
