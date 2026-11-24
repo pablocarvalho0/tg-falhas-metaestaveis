@@ -250,19 +250,23 @@ A transição é **probabilística**, como prevê a definição de metaestabilid
 
 ### Reprodutibilidade em duas máquinas
 
-Rodamos a mesma campanha numa segunda máquina, bem diferente da primeira:
+Rodamos a mesma campanha numa segunda máquina, bem diferente da primeira. O código, os
+parâmetros e as sementes são os mesmos; a calibração é feita em cada máquina.
 
-| | Máquina A | Máquina B |
+| | Máquina A (Mac) | Máquina B (Linux) |
 |---|---|---|
 | Ambiente | laptop arm64, VM com 2 vCPU e 2 GB | VM em nuvem x86_64, 4 vCPU e 15 GB |
-| Capacidade μ | 190,45 req/s | 197,04 req/s |
-| Tempo de serviço Ŝ | 42,03 ms | 40,59 ms |
+| Capacidade μ / tempo de serviço Ŝ | 190,45 req/s / 42,03 ms | 197,04 req/s / 40,59 ms |
+| Desfechos iguais (repetição 1) | — | **31 de 32** |
 
-O código, os parâmetros e as sementes são os mesmos. As políticas se ajustam à calibração de
-cada máquina. Nas primeiras execuções, os desfechos coincidem. A primeira divergência apareceu
-numa célula de fronteira: com o limite fixo a 50 % de carga, os impacientes ficaram com 10 %
-sem resposta na máquina A e 0 % na máquina B. A comparação completa, com o que muda e o que se
-mantém, está em [`experimento/reprodutibilidade.md`](experimento/reprodutibilidade.md) (em andamento).
+- Fila fixa presa a partir de 50 % e prazo por pedido e LIFO recuperando sempre, nas duas máquinas.
+- **A única divergência:** com limite fixo e espera fixa a 70 %, o serviço caiu *antes* da falha
+  no Mac e ficou preso *depois* dela no Linux. Mesmo destino, gatilho diferente.
+- **Onde a política é robusta, as máquinas concordam; onde ela é frágil, a máquina decide quando
+  ela quebra.**
+
+Comparação célula a célula: [`experimento/reprodutibilidade.md`](experimento/reprodutibilidade.md).
+Dados brutos da máquina B: [`experimento/resultados/`](experimento/resultados/).
 
 ### Como instalar e executar
 
