@@ -1,0 +1,62 @@
+{
+  "alvo": "http://servico:8080",
+  "quando": "2026-11-24T11:41:32.796408418Z",
+  "workers": 8,
+  "fila": 64,
+  "servico_ms": 40,
+  "mu_nominal_req_s": 200,
+  "taxa_saturacao_req_s": 300,
+  "medidas": [
+    {
+      "rep": 1,
+      "mu_req_s": 196.93388914082823,
+      "tempo_servico_ms": 40.61372426536144,
+      "janela_s": 30.08116087,
+      "concluidos": 5924,
+      "rejeitados": 3089,
+      "workers_ocupados_media": 8,
+      "tempo_servico_amostras": 5924,
+      "tempo_servico_p50_ms": 42.50295757985466,
+      "tempo_servico_p95_ms": 44.75561940172385,
+      "tempo_servico_p99_ms": 44.95585600811222,
+      "mu_pela_lei_de_little_req_s": 196.97774938662855
+    },
+    {
+      "rep": 2,
+      "mu_req_s": 197.25433642589115,
+      "tempo_servico_ms": 40.560736804689036,
+      "janela_s": 30.057640848,
+      "concluidos": 5929,
+      "rejeitados": 3079,
+      "workers_ocupados_media": 8,
+      "tempo_servico_amostras": 5929,
+      "tempo_servico_p50_ms": 42.502532500422085,
+      "tempo_servico_p95_ms": 44.754811750801956,
+      "tempo_servico_p99_ms": 44.955014350835725,
+      "mu_pela_lei_de_little_req_s": 197.23507584495255
+    },
+    {
+      "rep": 3,
+      "mu_req_s": 196.94160902721737,
+      "tempo_servico_ms": 40.59642716644176,
+      "janela_s": 30.019049957,
+      "concluidos": 5912,
+      "rejeitados": 3081,
+      "workers_ocupados_media": 8,
+      "tempo_servico_amostras": 5912,
+      "tempo_servico_p50_ms": 42.505084745762716,
+      "tempo_servico_p95_ms": 44.75966101694915,
+      "tempo_servico_p99_ms": 44.96006779661017,
+      "mu_pela_lei_de_little_req_s": 197.0616765657901
+    }
+  ],
+  "mu_req_s": 197.0432781979789,
+  "desvio_max_pct": 0.10711262512603267,
+  "tolerancia_pct": 5,
+  "aprovado": true,
+  "s_hat_ms": 40.59028361784442,
+  "s_hat_desvio_max_pct": 0.07282349969634046,
+  "s_hat_p95_ms": 44.75669738982498,
+  "mu_contado_vs_little_pct": 0.06096605951672366,
+  "s_hat_aprovado": true
+}
