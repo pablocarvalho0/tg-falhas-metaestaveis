@@ -355,6 +355,7 @@ exame_2/                   experimento 2: código, metodologia, resultados, apre
   orquestrador/            orquestrador Go (calibração, falha, coleta)
   analise/                 análise e estatística (Python)
   modelo/                  análise matemática e simulador
+  CONTRIBUTING.md          como o código está organizado e como mexer nele
 docs/decisoes/             decisões de escopo (0001: escopo do semestre; 0002: mudança de foco)
 PROXIMOS_PASSOS.md         tarefas abertas da equipe
 index.html                 nota de escopo do TG: https://pablocarvalho0.github.io/tg-falhas-metaestaveis/
