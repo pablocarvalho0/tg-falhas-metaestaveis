@@ -11,6 +11,10 @@ de conseguir mudar alguma coisa sozinho. Ele tem três partes:
 
 Se você só tem 5 minutos, leia a Parte 1 e o [mapa do slide](#o-mapa-do-slide-protótipo).
 
+> Todo o código fica em [`experimento/`](experimento/). Os caminhos citados neste guia
+> (`servidor/`, `cliente/`, `orquestrador/`…) são relativos a essa pasta, e os comandos rodam
+> de dentro dela: `cd experimento`.
+
 ---
 
 ## Parte 1 · Intuição: a bancada é um restaurante
@@ -112,7 +116,7 @@ Isso se repete para **4 regras × 2 retries × 4 cargas = 32 ensaios**, três ve
 
 ### O mapa do slide "Protótipo"
 
-O slide **"Protótipo · A bancada e como ela foi testada"** da [apresentação](../apresentacao/apresentacao.html)
+O slide **"Protótipo · A bancada e como ela foi testada"** da [apresentação](apresentacao/apresentacao.html)
 tem 7 caixas. Cada uma é uma pasta:
 
 ```
@@ -232,7 +236,7 @@ São arquivos curtos de configuração, cada um com seu `Dockerfile`:
 7. se a maior pausa passou de 50 ms, **descarta a execução**;
 8. coleta as séries, grava `series.csv`, calcula o `Resumo` e grava `manifesto.json`.
 
-**O que sai** fica em `resultados/` (veja a tabela no [README](README.md#output)):
+**O que sai** fica em `resultados/` (veja a tabela no [README](experimento/README.md#output)):
 `series.csv` (uma linha por segundo), `manifesto.json` (tudo o que é preciso para reproduzir a
 execução) e `resumo.csv` (uma linha por execução).
 
@@ -247,7 +251,7 @@ execução) e `resumo.csv` (uma linha por execução).
 
 É uma validação independente da bancada: `simulador.py` implementa as mesmas 4 políticas num
 simulador de eventos discretos, só com a biblioteca padrão do Python, em ~3 s e sem Docker. Se a
-bancada e o simulador discordam, um dos dois tem bug. Veja o [modelo-matematico/README.md](modelo-matematico/README.md).
+bancada e o simulador discordam, um dos dois tem bug. Veja o [modelo-matematico/README.md](experimento/modelo-matematico/README.md).
 
 ### Os dois scripts de entrada
 

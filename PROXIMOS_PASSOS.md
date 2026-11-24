@@ -8,7 +8,7 @@ até 01/dez** no Classroom.
 | Entrega | Onde | Estado |
 |---|---|---|
 | Código da bancada (cliente, servidor, orquestrador, análise) | `experimento/` | pronto; 40 testes passam |
-| Guia do código | `experimento/CONTRIBUTING.md` | pronto |
+| Guia do código | `CONTRIBUTING.md` | pronto |
 | Reprodutibilidade em duas máquinas | `experimento/reprodutibilidade.md` | calibração + primeiras execuções; completa ao fim da campanha |
 | Plano, metodologia, resultados (repetição 1) | `experimento/plano.md`, `metodologia.md`, `resultados.md` | pronto, em inglês |
 | Análise matemática + simulador | `experimento/modelo-matematico/` | pronto |
